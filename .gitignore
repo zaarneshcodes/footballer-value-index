@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# Data and model artifacts
+data/raw/
+data/processed/
+*.pkl
+*.joblib
+
+# Secrets
+.env
+.env.*
+!.env.example
+kaggle.json
+
+# OS
+.DS_Store
