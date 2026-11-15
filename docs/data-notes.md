@@ -89,3 +89,10 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Some projections start from an older valuation (`value_date` 2022-2025), so the site must show `value_date`.
 - Load: `python pipeline/load_db.py` only fills empty tables. `--replace` empties and reloads all 4 in one transaction; any error or count mismatch rolls back.
 - `--dry-run` validates the data without connecting. The connection string comes only from `DATABASE_URL` and is never printed.
+- First load (2026-11-15): players 3,012 / valuations 59,064 / season_stats 13,086 / projections 3,012, all matching the parquet files; database size 17 MB.
+
+## Web (web/)
+- Next.js 16.4.6 (App Router, TypeScript, `src/`), Tailwind 4. All versions pinned exactly in `web/package.json`.
+- Database access: `@neondatabase/serverless` 1.2.0 (Neon's HTTP driver, suited to Vercel serverless functions). Server-only module `web/src/lib/db.ts` reads `DATABASE_URL`.
+- `GET /api/health` returns table row counts only. It answers 503 with a generic message if the DB is unreachable and never echoes errors.
+- `npm audit`: 0 vulnerabilities in production deps; 7 moderate in ESLint dev tooling only (not shipped).
