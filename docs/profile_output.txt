@@ -1,0 +1,68 @@
+
+=== Files ===
+appearances          rows= 1,894,350  cols=13
+club_games           rows=   177,916  cols=11
+clubs                rows=       796  cols=17
+competitions         rows=        65  cols=11
+countries            rows=       124  cols=8
+game_events          rows= 1,274,469  cols=11
+game_lineups         rows= 3,179,016  cols=10
+games                rows=    88,958  cols=23
+national_teams       rows=       124  cols=17
+player_valuations    rows=   656,301  cols=6
+players              rows=    50,149  cols=26
+transfers            rows=   175,165  cols=10
+
+=== Columns (null %) ===
+appearances: appearance_id(0.0%), game_id(0.0%), player_id(0.0%), player_club_id(0.0%), player_current_club_id(0.0%), date(0.0%), player_name(0.0%), competition_id(0.0%), yellow_cards(0.0%), red_cards(0.0%), goals(0.0%), assists(0.0%), minutes_played(0.0%)
+
+club_games: game_id(0.0%), club_id(0.0%), own_goals(0.0%), own_position(28.5%), own_manager_name(0.9%), opponent_id(0.0%), opponent_goals(0.0%), opponent_position(28.5%), opponent_manager_name(0.9%), hosting(0.0%), is_win(0.0%)
+
+clubs: club_id(0.0%), club_code(0.0%), name(0.0%), domestic_competition_id(0.0%), total_market_value(100.0%), squad_size(0.0%), average_age(4.8%), foreigners_number(0.0%), foreigners_percentage(7.5%), national_team_players(0.0%), stadium_name(0.0%), stadium_seats(0.0%), net_transfer_record(0.0%), coach_name(49.4%), last_season(0.0%), filename(0.0%), url(0.0%)
+
+competitions: competition_id(0.0%), competition_code(0.0%), name(0.0%), sub_type(0.0%), type(0.0%), country_id(0.0%), country_name(18.5%), domestic_league_code(18.5%), confederation(0.0%), total_clubs(23.1%), url(0.0%)
+
+countries: country_id(0.0%), country_name(0.0%), country_code(0.0%), confederation(0.0%), total_clubs(0.0%), total_players(0.0%), average_age(0.0%), url(0.0%)
+
+game_events: game_event_id(0.0%), date(0.0%), game_id(0.0%), minute(0.0%), type(0.0%), club_id(0.0%), club_name(0.0%), player_id(0.0%), description(7.3%), player_in_id(50.5%), player_assist_id(85.2%)
+
+game_lineups: game_lineups_id(0.0%), date(0.0%), game_id(0.0%), player_id(0.0%), club_id(0.0%), player_name(0.0%), type(0.0%), position(0.0%), number(0.0%), team_captain(0.0%)
+
+games: game_id(0.0%), competition_id(0.0%), season(0.0%), round(0.0%), date(0.0%), home_club_id(0.0%), away_club_id(0.0%), home_club_goals(0.0%), away_club_goals(0.0%), home_club_position(28.5%), away_club_position(28.5%), home_club_manager_name(0.9%), away_club_manager_name(0.9%), stadium(0.3%), attendance(12.1%), referee(0.8%), url(0.0%), home_club_formation(9.2%), away_club_formation(9.1%), home_club_name(0.1%), away_club_name(0.0%), aggregate(0.0%), competition_type(1.4%)
+
+national_teams: national_team_id(0.0%), name(0.0%), team_code(0.0%), country_id(0.0%), country_name(0.0%), country_code(0.0%), confederation(0.8%), team_image_url(0.0%), squad_size(0.0%), average_age(0.0%), foreigners_number(0.0%), foreigners_percentage(6.5%), total_market_value(3.2%), coach_name(100.0%), fifa_ranking(0.0%), last_season(0.0%), url(0.0%)
+
+player_valuations: player_id(0.0%), date(0.0%), market_value_in_eur(0.0%), current_club_name(0.0%), current_club_id(0.0%), player_club_domestic_competition_id(14.2%)
+
+players: player_id(0.0%), first_name(6.3%), last_name(0.0%), name(0.0%), last_season(0.0%), current_club_id(0.0%), player_code(0.0%), country_of_birth(11.7%), city_of_birth(11.2%), country_of_citizenship(0.5%), date_of_birth(0.1%), sub_position(1.2%), position(0.0%), foot(11.8%), height_in_cm(8.7%), contract_expiration_date(37.0%), agent_name(46.5%), image_url(0.0%), international_caps(61.4%), international_goals(61.4%), current_national_team_id(93.5%), url(0.0%), current_club_domestic_competition_id(6.0%), current_club_name(6.0%), market_value_in_eur(17.2%), highest_market_value_in_eur(17.2%)
+
+transfers: player_id(0.0%), transfer_date(0.0%), transfer_season(0.0%), from_club_id(0.0%), to_club_id(0.0%), from_club_name(0.0%), to_club_name(0.0%), transfer_fee(35.1%), market_value_in_eur(38.9%), player_name(0.0%)
+
+
+=== Date coverage ===
+appearances          2012-07-03 00:00:00 -> 2026-06-28 00:00:00  (unparseable: 0)
+game_events          2006-06-09 00:00:00 -> 2026-07-06 00:00:00  (unparseable: 0)
+game_lineups         2013-07-02 00:00:00 -> 2026-07-06 00:00:00  (unparseable: 0)
+games                2006-06-09 00:00:00 -> 2026-07-06 00:00:00  (unparseable: 0)
+player_valuations    2000-01-20 00:00:00 -> 2026-06-12 00:00:00  (unparseable: 0)
+
+=== Players by current league (top 5) ===
+current_club_domestic_competition_id
+Serie A           3200
+LaLiga            2278
+Premier League    2259
+Ligue 1           2253
+Bundesliga        1823
+Total top-5 players (any season): 11,813
+Top-5 players with last_season == 2025: 3,627
+Top-5 players with a current market value: 10,715
+
+=== Valuation history per player ===
+count    41528.0
+mean        15.8
+std          9.8
+min          1.0
+25%          8.0
+50%         15.0
+75%         23.0
+max         57.0
