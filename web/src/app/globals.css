@@ -1,26 +1,247 @@
 @import "tailwindcss";
 
+/* Palette: a pitch at a day match. Floodlight amber is reserved for model estimates. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --chalk: #f4f6f3; /* page */
+  --sheet: #ffffff; /* raised surfaces */
+  --ink: #14211b; /* text */
+  --muted: #56665e; /* secondary text */
+  --rule: #cfd8d2; /* lines, borders */
+  --pitch: #1d4a39; /* brand, links */
+  --flood: #8f6500; /* estimate lines and text (4.5:1+ on chalk) */
+  --flood-fill: #f2c230; /* estimate band fill */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --chalk: #0e1813;
+    --sheet: #15221b;
+    --ink: #e6ede9;
+    --muted: #9db0a6;
+    --rule: #2c3d34;
+    --pitch: #7fc7a6;
+    --flood: #f2c230;
+    --flood-fill: #f2c230;
   }
 }
 
+@theme inline {
+  --color-chalk: var(--chalk);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-pitch: var(--pitch);
+  --color-flood: var(--flood);
+  --color-flood-fill: var(--flood-fill);
+  --font-sans: var(--font-barlow);
+  --font-display: var(--font-barlow-condensed);
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--chalk);
+  color: var(--ink);
+  font-family: var(--font-barlow), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 3px solid var(--flood-fill);
+  outline-offset: 2px;
+}
+
+/* ---------- Motion ----------
+   Curves from the animate skill; never hand-rolled. Only transform, opacity and
+   stroke-dashoffset animate. Every effect has a reduced-motion fallback below. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --down: #b3261e; /* falling values */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --down: #ff8a80;
+  }
+}
+
+/* Headline lines rise out of a mask (home hero, seen once per visit). */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em; /* keep descenders inside the mask */
+}
+.line-rise {
+  display: block;
+  animation: rise 800ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+/* Supporting content: short fade and lift. */
+.fade-up {
+  animation: fade-up 600ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* SVG lines draw themselves: the path needs pathLength="1". */
+.draw {
+  stroke-dasharray: 1;
+  animation: draw var(--dur, 1400ms) var(--ease-in-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Estimate band fans out from "today" (transform-origin set inline in SVG units). */
+.fan {
+  transform-box: view-box;
+  animation: fan 700ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes fan {
+  from {
+    opacity: 0;
+    transform: scaleX(0.08);
+  }
+}
+.fade-in {
+  animation: fade-in 400ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Scoreboard digits: each digit strip spins one full turn, then lands on its value. */
+.roll {
+  display: inline-flex;
+  align-items: flex-start;
+}
+.roll-digit {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  line-height: 1;
+}
+.roll-strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--n) * -1em - 10em));
+  animation: roll 900ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+.roll-strip > span {
+  height: 1em;
+}
+@keyframes roll {
+  from {
+    transform: translateY(0);
+  }
+}
+
+/* Ticker: constant motion is linear. Pauses on hover/focus so names can be read. */
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 60s linear infinite;
+}
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Hero chart: hovering a line brings it forward (mouse devices only). */
+@media (hover: hover) and (pointer: fine) {
+  .race-line {
+    transition: opacity 200ms ease;
+  }
+  .race:hover .race-line {
+    opacity: 0.25;
+  }
+  .race:hover .race-line:hover {
+    opacity: 1;
+  }
+  .row-hover {
+    transition: background-color 150ms ease;
+  }
+  .row-hover:hover {
+    background-color: color-mix(in oklab, var(--pitch) 6%, transparent);
+  }
+}
+
+/* Player name morphs from the list into the page heading. */
+::view-transition-group(.name-morph) {
+  animation-duration: 450ms;
+  animation-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Fewer, gentler: keep fades, drop movement and loops. */
+  .line-rise,
+  .fade-up,
+  .fan {
+    animation-name: fade-in;
+  }
+  /* Collapse the choreography: everything appears together. */
+  .line-rise,
+  .fade-up,
+  .fan,
+  .fade-in {
+    animation-delay: 0ms;
+  }
+  .draw,
+  .roll-strip {
+    animation: none;
+  }
+  .ticker-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .ticker-track > [aria-hidden] {
+    display: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+  }
+}
+
+/* Charts scale down with the screen; enlarge their text on phones so it stays readable. */
+@media (max-width: 40rem) {
+  .value-chart text {
+    font-size: 22px;
+  }
+  .race text {
+    font-size: 27px;
+  }
 }
