@@ -64,3 +64,9 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Stats: only top-5 domestic league games, aggregated per player, season and league.
 - Valuations: full history for anyone with a top-5 league appearance since 2012.
 - Players shown on site: current top-5 club and `last_season` equal to the dataset max.
+- Site players without a current market value are dropped.
+- Players with no top-5 stats are kept (shown as "no league stats").
+
+## Features (pipeline/features.py)
+- One row per valuation. Target: value ~5y later (nearest valuation within 180 days).
+- Stats come from the last season completed before the anchor, so no future data leaks in.

@@ -38,20 +38,21 @@ def main() -> int:
                   yellow_cards=("yellow_cards", "sum"), red_cards=("red_cards", "sum")))
     stats["league"] = stats["competition_id"].map(TOP5)
 
-    # Valuations: full history of anyone with a top-5 league appearance.
-    top5_ids = set(apps["player_id"])
-    vals = read("player_valuations", parse_dates=["date"])
-    vals = (vals[vals["player_id"].isin(top5_ids)]
-            .drop_duplicates(["player_id", "date"]).sort_values(["player_id", "date"]))
-    vals = vals[["player_id", "date", "market_value_in_eur", "current_club_id", "current_club_name"]]
-
     # Players: currently in a top-5 league, latest season.
     players = read("players", usecols=PLAYER_COLS,
                    parse_dates=["date_of_birth", "contract_expiration_date"])
     latest = players["last_season"].max()
     players = players[players["current_club_domestic_competition_id"].isin(TOP5)
-                      & (players["last_season"] == latest)].copy()
+                      & (players["last_season"] == latest)
+                      & players["market_value_in_eur"].notna()].copy()  # site needs a value
     players["league"] = players["current_club_domestic_competition_id"].map(TOP5)
+    # Valuations: full history of anyone with a top-5 appearance, plus current site players.
+    top5_ids = set(apps["player_id"]) | set(players["player_id"])
+    vals = read("player_valuations", parse_dates=["date"])
+    vals = (vals[vals["player_id"].isin(top5_ids)]
+            .drop_duplicates(["player_id", "date"]).sort_values(["player_id", "date"]))
+    vals = vals[["player_id", "date", "market_value_in_eur", "current_club_id", "current_club_name"]]
+
     last_val = vals.groupby("player_id")["date"].max().rename("market_value_date")
     players = players.merge(last_val, on="player_id", how="left")
 
