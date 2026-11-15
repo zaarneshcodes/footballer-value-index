@@ -189,18 +189,16 @@ function RangeBar({ now, low, mid, high }: { now: number; low: number; mid: numb
   );
 }
 
-/**
- * Match moment for a search or filter. The scene says what happened:
- * nothing found = keeper save; exactly one = diving header ("spot on");
- * 10+ for a name search = bicycle kick; filters only = free kick; otherwise a goal.
- */
+/** Match moment for a search or filter: a random scene, with a plain factual caption. */
 function SearchMoment({ f, total, first }: { f: ListFilters; total: number; first?: string }) {
   const n = total.toLocaleString("en-GB");
-  if (total === 0) {
-    return <PlayScene scene="save" caption={`Saved! No player matched${f.q ? ` “${f.q}”` : " those filters"}.`} />;
-  }
-  if (total === 1) return <PlayScene scene="header" caption={`Spot on! Found ${first ?? "1 player"}.`} />;
-  if (!f.q) return <PlayScene scene="freekick" caption={`Top bins! ${n} players match those filters.`} />;
-  if (total >= 10) return <PlayScene scene="bicycle" caption={`Bicycle kick! ${n} players found.`} />;
-  return <PlayScene scene="goal" caption={`Goal! ${n} players found.`} />;
+  const caption =
+    total === 0
+      ? `No player matched${f.q ? ` “${f.q}”` : " those filters"}.`
+      : total === 1
+        ? `Found ${first ?? "1 player"}.`
+        : f.q
+          ? `${n} players found.`
+          : `${n} players match those filters.`;
+  return <PlayScene caption={caption} />;
 }

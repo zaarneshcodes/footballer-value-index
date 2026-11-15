@@ -58,15 +58,12 @@ async function Player({ params }: Pick<PageProps<"/players/[id]">, "params">) {
 
   return (
     <>
-      {/* Estimate doubles or more: hat-trick. Rises: knee slide. Falls: a tackle. */}
+      {/* Match moment: a random scene, with the estimate stated plainly in the caption. */}
       {pr && (
         <PlayScene
-          scene={pr.mid >= 2 * p.value ? "hattrick" : pr.mid > p.value ? "kneeslide" : "tackle"}
-          caption={
-            pr.mid > p.value
-              ? `${p.name} is on the rise: ${eur(pr.low)}–${eur(pr.high)} by ${pr.projection_date.slice(0, 4)}.`
-              : `Tackled: ${p.name}'s estimate drops to ${eur(pr.low)}–${eur(pr.high)} by ${pr.projection_date.slice(0, 4)}.`
-          }
+          caption={`${p.name}: estimate ${eur(pr.low)}–${eur(pr.high)} by ${pr.projection_date.slice(0, 4)}, ${
+            pr.mid > p.value ? "up" : "down"
+          } from ${eur(p.value)} today.`}
         />
       )}
       <header className="flex flex-col gap-3">

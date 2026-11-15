@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Scene, type SceneName } from "@/components/match/Scenes";
+import { SCENE_NAMES, Scene, type SceneName } from "@/components/match/Scenes";
 
 // Corner "match moment": a small pitch card (bottom-right) that plays a short scene
 // after a search or when a player page opens. It never blocks clicks, disappears on
 // its own, and can be switched off (remembered in this browser).
 
-type Moment = { scene: SceneName; caption: string };
+type Moment = { caption: string };
 const EVENT = "fvi:match-moment";
 const STORAGE_KEY = "fvi-match-moments";
+const BAG_KEY = "fvi-scene-bag";
 const SHOW_MS = 3200;
 
 declare global {
@@ -36,20 +37,54 @@ function setOff(off: boolean) {
   window.dispatchEvent(new Event(`${EVENT}-setting`));
 }
 
-/** Pages render this to request a scene. Fires once per distinct scene + caption. */
-export function PlayScene({ scene, caption }: Moment) {
+/**
+ * Shuffle bag: every scene plays once, in random order, before any repeats, and
+ * the first of a new round is never the scene that just played. Kept for the tab's
+ * session so it carries across page loads.
+ */
+let memoryBag: { left: SceneName[]; last?: SceneName } = { left: [] };
+function nextScene(): SceneName {
+  let bag = memoryBag;
+  try {
+    const saved = sessionStorage.getItem(BAG_KEY);
+    if (saved) bag = JSON.parse(saved);
+  } catch {
+    /* storage blocked or bad JSON: use the in-memory bag */
+  }
+  let left = (bag.left ?? []).filter((s): s is SceneName => (SCENE_NAMES as readonly string[]).includes(s));
+  if (left.length === 0) {
+    left = [...SCENE_NAMES];
+    for (let i = left.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [left[i], left[j]] = [left[j], left[i]];
+    }
+    // Never the same scene twice in a row across rounds.
+    if (left[0] === bag.last) [left[0], left[left.length - 1]] = [left[left.length - 1], left[0]];
+  }
+  const scene = left.shift()!;
+  memoryBag = { left, last: scene };
+  try {
+    sessionStorage.setItem(BAG_KEY, JSON.stringify(memoryBag));
+  } catch {
+    /* fine: the in-memory bag still avoids repeats on this page */
+  }
+  return scene;
+}
+
+/** Pages render this to request a moment. Fires once per distinct caption. */
+export function PlayScene({ caption }: Moment) {
   useEffect(() => {
-    const m = { scene, caption };
+    const m = { caption };
     // The layout's listener may mount after this effect (children run first), so
     // leave the request where it can pick it up, then announce it.
     window.__fviPendingMoment = m;
     window.dispatchEvent(new CustomEvent<Moment>(EVENT, { detail: m }));
-  }, [scene, caption]);
+  }, [caption]);
   return null;
 }
 
 export function MatchMoment() {
-  const [moment, setMoment] = useState<(Moment & { id: number }) | null>(null);
+  const [moment, setMoment] = useState<(Moment & { scene: SceneName; id: number }) | null>(null);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -57,7 +92,7 @@ export function MatchMoment() {
       window.__fviPendingMoment = undefined;
       if (isOff() || document.hidden) return;
       clearTimeout(timer);
-      setMoment({ ...m, id: Date.now() });
+      setMoment({ ...m, scene: nextScene(), id: Date.now() });
       timer = setTimeout(() => setMoment(null), SHOW_MS);
     };
     const onEvent = (e: Event) => play((e as CustomEvent<Moment>).detail);

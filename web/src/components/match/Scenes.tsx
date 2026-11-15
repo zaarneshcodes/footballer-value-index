@@ -4,15 +4,17 @@ import type { CSSProperties, ReactNode } from "react";
 // Original stick-figure style (no real players, kits or club marks).
 // Coordinate space: 240 x 140, ground at y = 122. Transform origins are in SVG units.
 
-export type SceneName =
-  | "goal"
-  | "header"
-  | "bicycle"
-  | "freekick"
-  | "save"
-  | "hattrick"
-  | "kneeslide"
-  | "tackle";
+export const SCENE_NAMES = [
+  "goal",
+  "header",
+  "bicycle",
+  "freekick",
+  "save",
+  "hattrick",
+  "kneeslide",
+  "tackle",
+] as const;
+export type SceneName = (typeof SCENE_NAMES)[number];
 
 const W = 7; // limb stroke width
 const at = (x: number, y: number): CSSProperties => ({ transformOrigin: `${x}px ${y}px` });
