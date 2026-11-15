@@ -1,3 +1,4 @@
 # Offline pipeline dependencies (pinned). LightGBM added later, in the model step.
 pandas==2.2.3   # load and clean the Kaggle CSVs
 kaggle==1.6.17  # official client to download davidcariboo/player-scores
+pyarrow==18.1.0 # fast typed Parquet files for processed data

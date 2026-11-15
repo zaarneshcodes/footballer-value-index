@@ -59,3 +59,8 @@ python pipeline/profile_data.py
 
 ## Decisions
 _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
+
+## Cleaning decisions (pipeline/clean.py)
+- Stats: only top-5 domestic league games, aggregated per player, season and league.
+- Valuations: full history for anyone with a top-5 league appearance since 2012.
+- Players shown on site: current top-5 club and `last_season` equal to the dataset max.
