@@ -1,0 +1,7 @@
+rows: fit 65,594 | validate 16,302 (anchors >= 2020-01-01)
+validation MAE (log ratio): model 0.836 | baseline 1.485 | improvement 43.7%
+validation median abs % error (value): model 62% | baseline 84%
+10-90 range coverage: 77.6% (target ~80%)
+best rounds: {'low': 415, 'mid': 533, 'high': 297}
+top features (mid): age, log_peak, n_valuations_so_far, log_value, height_in_cm, sub_position
+projections: 3,012 players | median mid/current ratio 0.43 | low>mid or mid>high: 0
