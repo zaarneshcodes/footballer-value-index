@@ -77,4 +77,6 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Known bias: players without a 5y valuation (retired/left) are absent, so projections may lean optimistic.
 - Results (2026-11-15, validation on 2020-21 anchors): log-ratio MAE 0.836 vs baseline 1.485 (44% better);
   median abs % error 62% vs 84%; 10-90 range coverage 77.6% (target 80%).
-- Current players: median projected mid value is 0.43x today's value (to be sanity-checked by age).
+- Current players: median projected mid value is 0.43x today's value. By age (mid / high ratio):
+  <=21: 2.74 / 13.62 | 22-24: 0.88 / 3.09 | 25-27: 0.44 / 1.27 | 28-30: 0.18 / 0.44 | 31+: 0.16 / 0.31.
+  The direction matches the usual age curve, so it's accepted for v1. Ranges are wide; always show them.
