@@ -2,7 +2,8 @@
   "name": "footballer-value-index",
   "image": "mcr.microsoft.com/devcontainers/python:3.12",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "24" }
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" },
+    "ghcr.io/devcontainers/features/git-lfs:1": { "version": "3.6.1", "autoPull": false }
   },
   "postCreateCommand": "npm install -g @anthropic-ai/claude-code",
   "customizations": {

@@ -12,8 +12,11 @@ out/
 .vercel/
 
 # Data and model artifacts
-data/raw/
-data/processed/
+# Everything under data/ (raw, processed, and any loose files)
+data/
+# Model files: any models/ folder, plus LightGBM and pickled formats
+models/
+*.lgb
 *.pkl
 *.joblib
 
