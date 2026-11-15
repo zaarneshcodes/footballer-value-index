@@ -20,7 +20,21 @@ export default async function Home() {
         <Ticker items={estimates} />
       </div>
 
-      <section className="flex max-w-4xl flex-col gap-7">
+      <section className="relative isolate flex max-w-4xl flex-col gap-7">
+        {/* Centre circle and halfway line in chalk, drawn in behind the headline. */}
+        <svg
+          aria-hidden
+          viewBox="0 0 400 400"
+          className="hero-chalk pointer-events-none absolute -top-16 -right-40 -z-10 h-[30rem] w-[30rem] max-sm:-right-56 max-sm:opacity-60"
+          fill="none"
+          stroke="var(--pitch)"
+          strokeOpacity="0.13"
+          strokeWidth="5"
+        >
+          <path pathLength={1} d="M200 0V400" />
+          <circle pathLength={1} cx="200" cy="200" r="120" />
+          <circle cx="200" cy="200" r="7" fill="var(--pitch)" fillOpacity="0.18" stroke="none" />
+        </svg>
         <h1 className="font-display text-[clamp(3rem,9vw,6.5rem)] leading-[0.92] font-bold tracking-tight text-pitch">
           <span className="line-mask">
             <span className="line-rise">What is a footballer</span>

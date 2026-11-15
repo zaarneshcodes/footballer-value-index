@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
+import { PlayScene } from "@/components/match/MatchMoment";
 import { RollingNumber } from "@/components/RollingNumber";
 import { ValueChart } from "@/components/ValueChart";
 import { date, eur, monthYear, season } from "@/lib/format";
@@ -57,6 +58,17 @@ async function Player({ params }: Pick<PageProps<"/players/[id]">, "params">) {
 
   return (
     <>
+      {/* Rising estimate: hat-trick celebration. Falling: a tackle. */}
+      {pr && (
+        <PlayScene
+          scene={pr.mid > p.value ? "hattrick" : "tackle"}
+          caption={
+            pr.mid > p.value
+              ? `${p.name} is on the rise: ${eur(pr.low)}–${eur(pr.high)} by ${pr.projection_date.slice(0, 4)}.`
+              : `Tackled: ${p.name}'s estimate drops to ${eur(pr.low)}–${eur(pr.high)} by ${pr.projection_date.slice(0, 4)}.`
+          }
+        />
+      )}
       <header className="flex flex-col gap-3">
         {/* Same name as the list link: the name morphs from the row into this heading. */}
         <ViewTransition name={`player-name-${p.id}`} share="name-morph" default="none">

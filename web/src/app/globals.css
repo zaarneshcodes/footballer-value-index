@@ -245,3 +245,236 @@ body {
     font-size: 27px;
   }
 }
+
+/* ---------- Pitch look ----------
+   Turf colours for the header and match cards; very faint mown stripes on the page. */
+:root {
+  --turf: #1b4a37;
+  --turf-2: #205640;
+  --chalk-line: #f4f6f3;
+  --ball: #ffffff;
+  --ball-ink: #14211b;
+  --mow: color-mix(in oklab, var(--pitch) 3.5%, var(--chalk));
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --turf: #13372a;
+    --turf-2: #174132;
+    --mow: color-mix(in oklab, var(--pitch) 4%, var(--chalk));
+  }
+}
+body {
+  background-image: repeating-linear-gradient(90deg, var(--chalk) 0 96px, var(--mow) 96px 192px);
+}
+.pitch-strip {
+  background-color: var(--turf);
+  background-image: repeating-linear-gradient(90deg, var(--turf) 0 72px, var(--turf-2) 72px 144px);
+}
+
+/* Logo: the ball rolls in once (kick-off), spins on hover. */
+.logo-ball-roll {
+  animation: kickoff 1000ms var(--ease-out) both 150ms;
+}
+@keyframes kickoff {
+  from {
+    opacity: 0;
+    transform: translateX(-3.5em) rotate(-720deg);
+  }
+}
+.logo-ball-spin {
+  transition: transform 600ms var(--ease-out);
+}
+.nav-ball {
+  transition: transform 500ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .logo:hover .logo-ball-spin {
+    transform: rotate(360deg);
+  }
+  .nav-link:hover .nav-ball {
+    transform: translateX(3px) rotate(360deg);
+  }
+}
+
+/* ---------- Match moments (corner card) ----------
+   One timeline per scene; every part shares the same duration so it reads as one play. */
+.match-card {
+  animation: card-in 280ms var(--ease-out) both, card-out 240ms var(--ease-out) both 2960ms;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+@keyframes card-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.match-scene g,
+.match-scene rect,
+.match-scene text {
+  transform-box: view-box;
+}
+.match-scene [class^="m-"] {
+  animation-duration: 1800ms;
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-in-out);
+}
+
+/* Goal: back-swing, strike, ball arcs into the net, net bulges, arms go up. */
+.m-kick { animation-name: m-kick; }
+@keyframes m-kick {
+  0% { transform: rotate(0); }
+  22% { transform: rotate(48deg); }
+  34% { transform: rotate(-72deg); }
+  55%, 100% { transform: rotate(0); }
+}
+.m-goal-ball-x { animation-name: m-goal-x; }
+@keyframes m-goal-x {
+  0%, 34% { transform: translateX(0); }
+  68% { transform: translateX(142px); }
+  100% { transform: translateX(146px); }
+}
+.m-goal-ball-y { animation-name: m-goal-y; }
+@keyframes m-goal-y {
+  0%, 34% { transform: translateY(0); }
+  50% { transform: translateY(-40px); }
+  68% { transform: translateY(-26px); }
+  100% { transform: translateY(-22px); }
+}
+.m-net { animation-name: m-net; }
+@keyframes m-net {
+  0%, 66% { transform: none; }
+  76% { transform: translateX(5px) scaleY(1.05); }
+  100% { transform: none; }
+}
+.m-arms-up { animation-name: m-show-late; }
+.m-arms-down { animation-name: m-hide-late; }
+@keyframes m-show-late {
+  0%, 72% { opacity: 0; }
+  76%, 100% { opacity: 1; }
+}
+@keyframes m-hide-late {
+  0%, 72% { opacity: 1; }
+  76%, 100% { opacity: 0; }
+}
+.m-shout { animation-name: m-shout; }
+@keyframes m-shout {
+  0%, 70% { opacity: 0; transform: scale(0.8); }
+  80% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Save: shot from the left, keeper dives to the top corner, ball deflects up and out. */
+.m-keeper { animation-name: m-dive; }
+@keyframes m-dive {
+  0%, 30% { transform: none; }
+  52% { transform: translate(-12px, -14px) rotate(-62deg); }
+  100% { transform: translate(-14px, -10px) rotate(-70deg); }
+}
+.m-save-ball-x { animation-name: m-save-x; }
+@keyframes m-save-x {
+  0% { transform: translateX(-30px); }
+  52% { transform: translateX(160px); }
+  100% { transform: translateX(118px); }
+}
+.m-save-ball-y { animation-name: m-save-y; }
+@keyframes m-save-y {
+  0% { transform: translateY(0); opacity: 1; }
+  52% { transform: translateY(-50px); opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-120px); opacity: 0; }
+}
+.scene-save .m-shout { animation-name: m-shout-early; }
+@keyframes m-shout-early {
+  0%, 52% { opacity: 0; transform: scale(0.8); }
+  62% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Hat-trick: three jumps, a ball pops in with each, confetti falls. */
+.m-jump { animation-name: m-jump; }
+@keyframes m-jump {
+  0%, 30%, 60%, 90%, 100% { transform: translateY(0); }
+  15%, 45%, 75% { transform: translateY(-16px); }
+}
+.match-scene .m-pop {
+  animation-name: m-pop;
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out);
+}
+@keyframes m-pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.6); }
+}
+.match-scene .m-confetti {
+  animation-name: m-confetti;
+  animation-duration: 1300ms;
+  animation-timing-function: linear;
+}
+@keyframes m-confetti {
+  from { opacity: 0; transform: translateY(-12px) rotate(0); }
+  15% { opacity: 1; }
+  to { opacity: 0; transform: translateY(70px) rotate(300deg); }
+}
+
+/* Tackle: attacker dribbles in, defender slides, ball is taken, attacker tumbles. */
+.m-attacker { animation-name: m-attacker; }
+@keyframes m-attacker {
+  0% { transform: translateX(-34px); }
+  42% { transform: translateX(0); }
+  58% { transform: translateX(6px) rotate(20deg); }
+  100% { transform: translateX(10px) rotate(30deg); }
+}
+.m-slider { animation-name: m-slider; }
+@keyframes m-slider {
+  0%, 20% { opacity: 0; transform: translateX(80px); }
+  28% { opacity: 1; }
+  48% { transform: translateX(0); }
+  100% { opacity: 1; transform: translateX(-10px); }
+}
+.m-tackle-ball-x { animation-name: m-tackle-x; }
+@keyframes m-tackle-x {
+  0% { transform: translateX(-34px); }
+  42%, 50% { transform: translateX(0); }
+  100% { transform: translateX(112px); }
+}
+.m-tackle-ball-y { animation-name: m-tackle-y; }
+@keyframes m-tackle-y {
+  0%, 50% { transform: translateY(0); }
+  64% { transform: translateY(-16px); }
+  78%, 100% { transform: translateY(0); }
+}
+.scene-tackle .m-shout { animation-name: m-shout-early; }
+
+/* Home hero: centre circle and halfway line drawn in chalk behind the headline. */
+.hero-chalk path,
+.hero-chalk circle {
+  stroke-dasharray: 1;
+  animation: draw 1600ms var(--ease-in-out) both 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No roll, no play-by-play: show the final frame and fade the card. */
+  .logo-ball-roll {
+    animation-name: fade-in;
+  }
+  .match-scene [class^="m-"],
+  .match-scene .m-pop,
+  .match-scene .m-confetti {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+  .match-scene .m-confetti {
+    display: none;
+  }
+  .match-card {
+    animation: fade-in 200ms ease both, card-out 200ms ease both 2960ms;
+  }
+  .hero-chalk path,
+  .hero-chalk circle {
+    animation: none;
+  }
+}

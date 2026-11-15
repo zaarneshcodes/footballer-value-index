@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
+import { PlayScene } from "@/components/match/MatchMoment";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { eur } from "@/lib/format";
 import { LEAGUES, PAGE_SIZE, POSITIONS, listPlayers, type ListFilters } from "@/lib/queries";
@@ -54,6 +55,17 @@ async function Results({ searchParams }: Pick<PageProps<"/players">, "searchPara
 
   return (
     <>
+      {/* A search (or filter) gets a match moment: goal if anything matched, a save if not. */}
+      {filtered && f.page === 1 && (
+        <PlayScene
+          scene={rows.length ? "goal" : "save"}
+          caption={
+            rows.length
+              ? `Goal! ${total.toLocaleString("en-GB")} ${total === 1 ? "player" : "players"} found.`
+              : `Saved! No player matched${f.q ? ` “${f.q}”` : " those filters"}.`
+          }
+        />
+      )}
       <PlayerSearch q={f.q} league={f.league} position={f.position} showFilters />
 
       {rows.length === 0 ? (

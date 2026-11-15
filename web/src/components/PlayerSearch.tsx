@@ -1,3 +1,4 @@
+import Form from "next/form";
 import { LEAGUES, POSITIONS } from "@/lib/queries";
 
 type Props = {
@@ -10,10 +11,11 @@ type Props = {
 const field =
   "h-11 rounded-md border border-rule bg-sheet px-3 text-ink placeholder:text-muted";
 
-// Plain GET form: works without JavaScript and every search has a shareable URL.
+// next/form: client-side navigation (so the match moment can play), and still a plain
+// GET form without JavaScript, so every search has a shareable URL.
 export function PlayerSearch({ q, league, position, showFilters = false }: Props) {
   return (
-    <form action="/players" role="search" className="flex flex-wrap items-end gap-3">
+    <Form action="/players" role="search" className="flex flex-wrap items-end gap-3">
       <label className="flex min-w-60 flex-1 flex-col gap-1 text-sm font-medium">
         Player name
         <input
@@ -52,6 +54,6 @@ export function PlayerSearch({ q, league, position, showFilters = false }: Props
       >
         Search
       </button>
-    </form>
+    </Form>
   );
 }
