@@ -1,0 +1,9 @@
+train:   81,896 rows | players 8,064 | anchors 2013-07-01 -> 2021-12-01
+predict: 3,012 rows | site players 3,012 | dup ids 0
+train median value 1,600,000 -> 5y 1,800,000
+null % (train):
+value_1y_ago    14.4
+sub_position     0.1
+foot             0.4
+height_in_cm     0.2
+age              0.1

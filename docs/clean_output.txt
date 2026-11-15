@@ -1,11 +1,11 @@
 latest season: 2025
-players:          3,627 rows | dup ids: 0 | no value: 615
+players:          3,012 rows | dup ids: 0 | no value: 0
 league
-Premier League    826
-Serie A           770
-LaLiga            748
-Ligue 1           673
-Bundesliga        610
-valuations:     237,848 rows | players: 10,373 | 2001-07-20 -> 2026-06-11 | negative: 0
+Premier League    692
+Serie A           626
+LaLiga            595
+Bundesliga        562
+Ligue 1           537
+valuations:     240,264 rows | players: 10,653 | 2001-07-20 -> 2026-06-11 | negative: 0
 season_stats:    37,419 rows | seasons 2012-2025 | missing season: 0
-current players with no stats: 763
+current players with no stats: 280
