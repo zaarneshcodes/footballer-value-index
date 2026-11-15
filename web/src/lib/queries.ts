@@ -162,24 +162,53 @@ export async function getPlayer(id: string): Promise<PlayerDetail | null> {
   };
 }
 
-export type Move = { id: string; name: string; date: string; prev: number; value: number };
+export type TickerItem = {
+  id: string;
+  name: string;
+  age: number | null;
+  group: "top" | "rising";
+  value: number;
+  low: number;
+  mid: number;
+  high: number;
+  year: number;
+};
 
-/** Largest euro changes in each player's latest valuation, from the last ~4 months of data. */
-export async function latestMoves(limit = 16): Promise<Move[]> {
+/**
+ * Ticker content: the most valuable players, plus "ones to watch" (worth at least
+ * €20m, with the biggest expected rise in the model's middle estimate).
+ */
+export async function tickerEstimates(top = 13, rising = 7): Promise<TickerItem[]> {
   "use cache";
   cacheLife("hours");
-  return (await sql()`
-    WITH r AS (
-      SELECT player_id, date, market_value_in_eur::float8 AS value,
-             lag(market_value_in_eur::float8) OVER (PARTITION BY player_id ORDER BY date) AS prev,
-             row_number() OVER (PARTITION BY player_id ORDER BY date DESC) AS rn
-      FROM valuations)
-    SELECT p.player_id::text AS id, p.name, r.date::text AS date, r.prev, r.value
-    FROM r JOIN players p USING (player_id)
-    WHERE r.rn = 1 AND r.prev > 0 AND r.value <> r.prev
-      AND r.date >= (SELECT max(date) - 120 FROM valuations)
-    ORDER BY abs(r.value - r.prev) DESC, p.name
-    LIMIT ${limit}`) as Move[];
+  const rows = (await sql()`
+    WITH base AS (
+      SELECT p.player_id, p.name, p.market_value_in_eur::float8 AS value,
+             date_part('year', age(p.date_of_birth))::int AS age,
+             pr.proj_low_eur::float8 AS low, pr.proj_mid_eur::float8 AS mid,
+             pr.proj_high_eur::float8 AS high,
+             date_part('year', pr.projection_date)::int AS year
+      FROM players p JOIN projections pr USING (player_id)),
+    t AS (SELECT *, 'top' AS grp, row_number() OVER (ORDER BY value DESC, name) AS rk
+          FROM base ORDER BY value DESC, name LIMIT ${top}),
+    r AS (SELECT *, 'rising' AS grp, row_number() OVER (ORDER BY mid / value DESC, name) AS rk
+          FROM base WHERE value >= 20000000 AND player_id NOT IN (SELECT player_id FROM t)
+          ORDER BY mid / value DESC, name LIMIT ${rising})
+    SELECT player_id::text AS id, name, age, grp AS "group", value, low, mid, high, year, rk
+    FROM t UNION ALL
+    SELECT player_id::text, name, age, grp, value, low, mid, high, year, rk FROM r`) as (TickerItem & {
+    rk: number;
+  })[];
+  // Interleave: two big names, then one riser, so every big name is still there.
+  const tops = rows.filter((r) => r.group === "top").sort((a, b) => a.rk - b.rk);
+  const risers = rows.filter((r) => r.group === "rising").sort((a, b) => a.rk - b.rk);
+  const out: typeof rows = [];
+  tops.forEach((t, i) => {
+    out.push(t);
+    if (i % 2 === 1 && risers.length) out.push(risers.shift()!);
+  });
+  // The extra rank column is harmless to callers; the declared type hides it.
+  return [...out, ...risers];
 }
 
 export type RaceLine = {

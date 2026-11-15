@@ -3,21 +3,21 @@ import Link from "next/link";
 import { PlayerSearch } from "@/components/PlayerSearch";
 import { RaceChart } from "@/components/RaceChart";
 import { Ticker } from "@/components/Ticker";
-import { LEAGUES, latestMoves, topValueHistories } from "@/lib/queries";
+import { LEAGUES, tickerEstimates, topValueHistories } from "@/lib/queries";
 
 const delay = (ms: number) => ({ "--delay": `${ms}ms` }) as CSSProperties;
 
 // Hero choreography (seen once per visit, so it gets the delight budget):
 //   0–120ms   headline lines rise (lead)     260ms intro fades up (support)
 //   340ms     search fades up (support)      300ms+ chart lines draw as a wave
-//   500ms     ticker fades in, then scrolls  League links: static
+//   500ms     estimates ticker fades in, then scrolls   League links: static
 export default async function Home() {
-  const [moves, lines] = await Promise.all([latestMoves(), topValueHistories()]);
+  const [estimates, lines] = await Promise.all([tickerEstimates(), topValueHistories()]);
 
   return (
     <div className="flex flex-col gap-14">
       <div className="-mx-4 -mt-8 sm:mx-[calc(50%-50vw)]">
-        <Ticker moves={moves} />
+        <Ticker items={estimates} />
       </div>
 
       <section className="flex max-w-4xl flex-col gap-7">

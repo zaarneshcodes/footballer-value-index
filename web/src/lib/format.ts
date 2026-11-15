@@ -1,6 +1,5 @@
-/** €200m, €45.5m, €850k, €0 */
+/** €200m, €293.1m, €45.5m, €850k, €0 (one decimal for millions, dropped when whole) */
 export function eur(n: number): string {
-  if (n >= 100e6) return `€${Math.round(n / 1e6)}m`;
   if (n >= 1e6) return `€${(n / 1e6).toFixed(1).replace(/\.0$/, "")}m`;
   if (n >= 1e3) return `€${Math.round(n / 1e3)}k`;
   return `€${Math.round(n)}`;

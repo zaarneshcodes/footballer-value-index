@@ -1,49 +1,74 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { eur } from "@/lib/format";
-import type { Move } from "@/lib/queries";
+import type { TickerItem } from "@/lib/queries";
 
-function Item({ m, hidden }: { m: Move; hidden?: boolean }) {
-  const up = m.value > m.prev;
+function Item({ t, hidden }: { t: TickerItem; hidden?: boolean }) {
+  const up = t.mid > t.value;
   return (
     <li className="flex items-baseline gap-2 px-5 whitespace-nowrap">
       <Link
-        href={`/players/${m.id}`}
+        href={`/players/${t.id}`}
         tabIndex={hidden ? -1 : undefined}
         className="font-semibold underline-offset-4 hover:underline"
       >
-        {m.name}
+        {t.name}
       </Link>
-      <span className="text-muted">{eur(m.value)}</span>
+      {t.group === "rising" && t.age != null && <span className="text-muted">age {t.age}</span>}
+      <span className="text-muted">{eur(t.value)} now</span>
+      <span aria-hidden className="text-muted">
+        →
+      </span>
+      <span className="font-semibold text-flood">
+        {eur(t.low)}–{eur(t.high)}
+      </span>
+      <span className="text-muted">by {t.year}</span>
       <span className={up ? "text-pitch" : "text-[var(--down)]"}>
         <span aria-hidden>{up ? "▲" : "▼"}</span>
-        <span className="sr-only">{up ? "up" : "down"}</span> {eur(Math.abs(m.value - m.prev))}
+        <span className="sr-only">
+          middle estimate {eur(t.mid)}, {up ? "above" : "below"} today
+        </span>
       </span>
     </li>
   );
 }
 
-/** Market-ticker strip of the biggest moves in the latest Transfermarkt update. */
-export function Ticker({ moves }: { moves: Move[] }) {
-  if (moves.length === 0) return null;
+/**
+ * Scrolling strip of five-year estimate ranges: the biggest names, mixed with
+ * "ones to watch". A fixed label says these are model estimates, not facts.
+ */
+export function Ticker({ items }: { items: TickerItem[] }) {
+  if (items.length === 0) return null;
   return (
     <section
-      aria-label="Biggest value changes in the latest update"
-      className="ticker fade-in overflow-hidden border-b border-rule bg-sheet py-2.5 text-sm"
+      aria-label="Five-year value estimates"
+      className="fade-in flex items-stretch border-b border-rule bg-sheet text-sm"
       style={{ "--delay": "500ms" } as CSSProperties}
     >
-      <div className="ticker-track">
-        <ul className="flex">
-          {moves.map((m) => (
-            <Item key={m.id} m={m} />
-          ))}
-        </ul>
-        {/* Second copy makes the loop seamless; hidden from assistive tech. */}
-        <ul className="flex" aria-hidden>
-          {moves.map((m) => (
-            <Item key={m.id} m={m} hidden />
-          ))}
-        </ul>
+      <Link
+        href="/players"
+        className="z-10 flex shrink-0 flex-col justify-center border-r border-rule bg-sheet px-4 py-1.5 leading-tight"
+      >
+        <span className="font-display text-base font-semibold text-flood">5-year estimates</span>
+        <span className="hidden text-xs text-muted sm:block">model range, 10–90%</span>
+      </Link>
+      <div className="ticker min-w-0 flex-1 overflow-hidden py-2.5">
+        <div
+          className="ticker-track"
+          style={{ animationDuration: `${items.length * 6}s` } as CSSProperties}
+        >
+          <ul className="flex">
+            {items.map((t) => (
+              <Item key={t.id} t={t} />
+            ))}
+          </ul>
+          {/* Second copy makes the loop seamless; hidden from assistive tech. */}
+          <ul className="flex" aria-hidden>
+            {items.map((t) => (
+              <Item key={t.id} t={t} hidden />
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
