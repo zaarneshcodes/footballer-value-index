@@ -50,7 +50,7 @@ export function PlayerSearch({ q, league, position, showFilters = false }: Props
       )}
       <button
         type="submit"
-        className="h-11 rounded-md bg-pitch px-5 font-semibold text-chalk hover:opacity-90"
+        className="press h-11 rounded-md bg-pitch px-5 font-semibold text-chalk hover:opacity-90"
       >
         Search
       </button>

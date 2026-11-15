@@ -4,7 +4,15 @@ import type { CSSProperties, ReactNode } from "react";
 // Original stick-figure style (no real players, kits or club marks).
 // Coordinate space: 240 x 140, ground at y = 122. Transform origins are in SVG units.
 
-export type SceneName = "goal" | "save" | "hattrick" | "tackle";
+export type SceneName =
+  | "goal"
+  | "header"
+  | "bicycle"
+  | "freekick"
+  | "save"
+  | "hattrick"
+  | "kneeslide"
+  | "tackle";
 
 const W = 7; // limb stroke width
 const at = (x: number, y: number): CSSProperties => ({ transformOrigin: `${x}px ${y}px` });
@@ -13,11 +21,13 @@ function Limb({ d }: { d: [number, number, number, number] }) {
   return <line x1={d[0]} y1={d[1]} x2={d[2]} y2={d[3]} />;
 }
 
-function Ball({ x, y, r = 6 }: { x: number; y: number; r?: number }) {
+/** Ball with an off-centre panel, so spin reads. `spin` turns it during flight. */
+function Ball({ x, y, r = 6, spin = false }: { x: number; y: number; r?: number; spin?: boolean }) {
   return (
-    <g>
+    <g className={spin ? "m-spin" : undefined} style={spin ? at(x, y) : undefined}>
       <circle cx={x} cy={y} r={r} fill="var(--ball)" stroke="var(--ball-ink)" strokeWidth={1.4} />
-      <circle cx={x} cy={y} r={r * 0.36} fill="var(--ball-ink)" />
+      <circle cx={x + r * 0.32} cy={y - r * 0.18} r={r * 0.34} fill="var(--ball-ink)" />
+      <circle cx={x - r * 0.45} cy={y + r * 0.42} r={r * 0.16} fill="var(--ball-ink)" />
     </g>
   );
 }
@@ -40,7 +50,7 @@ function Goal() {
   );
 }
 
-function Shout({ children, x = 112 }: { children: ReactNode; x?: number }) {
+function Shout({ children, x = 112, size = 28 }: { children: ReactNode; x?: number; size?: number }) {
   return (
     <text
       x={x}
@@ -52,7 +62,7 @@ function Shout({ children, x = 112 }: { children: ReactNode; x?: number }) {
       fontFamily="var(--font-barlow-condensed)"
       fontWeight={700}
       fontStyle="italic"
-      fontSize={28}
+      fontSize={size}
     >
       {children}
     </text>
@@ -81,7 +91,7 @@ function GoalScene() {
       </g>
       <g className="m-goal-ball-x">
         <g className="m-goal-ball-y">
-          <Ball x={64} y={114} />
+          <Ball x={64} y={114} spin />
         </g>
       </g>
       <Shout>GOAL!</Shout>
@@ -103,7 +113,7 @@ function SaveScene() {
       </g>
       <g className="m-save-ball-x">
         <g className="m-save-ball-y">
-          <Ball x={18} y={108} />
+          <Ball x={18} y={108} spin />
         </g>
       </g>
       <Shout x={100}>SAVED!</Shout>
@@ -178,7 +188,7 @@ function TackleScene() {
       </g>
       <g className="m-tackle-ball-x">
         <g className="m-tackle-ball-y">
-          <Ball x={96} y={114} />
+          <Ball x={96} y={114} spin />
         </g>
       </g>
       <Shout x={128}>TACKLED!</Shout>
@@ -186,10 +196,131 @@ function TackleScene() {
   );
 }
 
+
+/** Diving header: a cross comes in from the left, the striker meets it, it flies in. */
+function HeaderScene() {
+  return (
+    <>
+      <Goal />
+      <g className="m-header-body" style={at(118, 120)} stroke="var(--chalk-line)" strokeWidth={W} strokeLinecap="round" fill="var(--chalk-line)">
+        <circle cx={120} cy={56} r={7} stroke="none" />
+        <Limb d={[118, 65, 114, 92]} />
+        <Limb d={[117, 70, 102, 62]} />
+        <Limb d={[117, 70, 132, 64]} />
+        <Limb d={[114, 92, 104, 118]} />
+        <Limb d={[114, 92, 124, 118]} />
+      </g>
+      <g className="m-header-ball-x">
+        <g className="m-header-ball-y">
+          <Ball x={124} y={36} spin />
+        </g>
+      </g>
+      <Shout x={92}>HEADER!</Shout>
+    </>
+  );
+}
+
+/** Bicycle kick: the striker flips backwards and volleys the dropping ball in. */
+function BicycleScene() {
+  return (
+    <>
+      <Goal />
+      <g className="m-bike-body" style={at(92, 96)} stroke="var(--chalk-line)" strokeWidth={W} strokeLinecap="round" fill="var(--chalk-line)">
+        <circle cx={92} cy={56} r={7} stroke="none" />
+        <Limb d={[92, 65, 92, 92]} />
+        <Limb d={[92, 70, 78, 80]} />
+        <Limb d={[92, 70, 106, 80]} />
+        <Limb d={[92, 92, 84, 120]} />
+        <g className="m-bike-leg" style={at(92, 92)}>
+          <Limb d={[92, 92, 100, 120]} />
+        </g>
+      </g>
+      <g className="m-bike-ball-x">
+        <g className="m-bike-ball-y">
+          <Ball x={92} y={40} spin />
+        </g>
+      </g>
+      <Shout x={100} size={24}>
+        BICYCLE KICK!
+      </Shout>
+    </>
+  );
+}
+
+/** Free kick: curled over a three-man wall, dipping into the top corner. */
+function FreekickScene() {
+  return (
+    <>
+      <Goal />
+      <g className="m-wall" stroke="var(--flood-fill)" strokeWidth={6} strokeLinecap="round" fill="var(--flood-fill)">
+        {[136, 150, 164].map((x) => (
+          <g key={x}>
+            <circle cx={x} cy={70} r={6} stroke="none" />
+            <Limb d={[x, 78, x, 100]} />
+            <Limb d={[x, 100, x - 4, 120]} />
+            <Limb d={[x, 100, x + 4, 120]} />
+          </g>
+        ))}
+      </g>
+      <g stroke="var(--chalk-line)" strokeWidth={W} strokeLinecap="round" fill="var(--chalk-line)">
+        <circle cx={30} cy={54} r={7} stroke="none" />
+        <Limb d={[30, 63, 28, 90]} />
+        <Limb d={[29, 68, 16, 78]} />
+        <Limb d={[29, 68, 42, 76]} />
+        <Limb d={[28, 90, 20, 118]} />
+        <g className="m-kick" style={at(28, 90)}>
+          <Limb d={[28, 90, 34, 118]} />
+        </g>
+      </g>
+      <g className="m-fk-ball-x">
+        <g className="m-fk-ball-y">
+          <Ball x={44} y={114} spin />
+        </g>
+      </g>
+      <Shout x={100}>TOP BINS!</Shout>
+    </>
+  );
+}
+
+/** Knee slide: the scorer slides across the turf, arms wide, spray behind. */
+function KneeslideScene() {
+  return (
+    <>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <circle
+          key={i}
+          cx={60 + i * 10}
+          cy={116 - (i % 2) * 5}
+          r={2.6}
+          fill="var(--chalk-line)"
+          className="m-spray"
+          style={{ ...at(60 + i * 10, 118), animationDelay: `${250 + i * 70}ms` }}
+        />
+      ))}
+      <g className="m-slide" style={at(110, 120)} stroke="var(--chalk-line)" strokeWidth={W} strokeLinecap="round" fill="var(--chalk-line)">
+        <circle cx={112} cy={62} r={7} stroke="none" />
+        <Limb d={[111, 71, 108, 97]} />
+        <Limb d={[110, 76, 90, 58]} />
+        <Limb d={[110, 76, 132, 58]} />
+        {/* Thigh forward to the knee, shin flat on the turf behind. */}
+        <Limb d={[108, 97, 124, 116]} />
+        <Limb d={[124, 116, 96, 117]} />
+      </g>
+      <Shout x={120} size={24}>
+        ON THE RISE!
+      </Shout>
+    </>
+  );
+}
+
 const SCENES: Record<SceneName, () => ReactNode> = {
   goal: GoalScene,
+  header: HeaderScene,
+  bicycle: BicycleScene,
+  freekick: FreekickScene,
   save: SaveScene,
   hattrick: HattrickScene,
+  kneeslide: KneeslideScene,
   tackle: TackleScene,
 };
 

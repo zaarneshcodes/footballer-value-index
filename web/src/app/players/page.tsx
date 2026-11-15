@@ -55,17 +55,7 @@ async function Results({ searchParams }: Pick<PageProps<"/players">, "searchPara
 
   return (
     <>
-      {/* A search (or filter) gets a match moment: goal if anything matched, a save if not. */}
-      {filtered && f.page === 1 && (
-        <PlayScene
-          scene={rows.length ? "goal" : "save"}
-          caption={
-            rows.length
-              ? `Goal! ${total.toLocaleString("en-GB")} ${total === 1 ? "player" : "players"} found.`
-              : `Saved! No player matched${f.q ? ` “${f.q}”` : " those filters"}.`
-          }
-        />
-      )}
+      {filtered && f.page === 1 && <SearchMoment f={f} total={total} first={rows[0]?.name} />}
       <PlayerSearch q={f.q} league={f.league} position={f.position} showFilters />
 
       {rows.length === 0 ? (
@@ -197,4 +187,20 @@ function RangeBar({ now, low, mid, high }: { now: number; low: number; mid: numb
       <div className="absolute -inset-y-0.5 left-1/2 w-px bg-ink" />
     </div>
   );
+}
+
+/**
+ * Match moment for a search or filter. The scene says what happened:
+ * nothing found = keeper save; exactly one = diving header ("spot on");
+ * 10+ for a name search = bicycle kick; filters only = free kick; otherwise a goal.
+ */
+function SearchMoment({ f, total, first }: { f: ListFilters; total: number; first?: string }) {
+  const n = total.toLocaleString("en-GB");
+  if (total === 0) {
+    return <PlayScene scene="save" caption={`Saved! No player matched${f.q ? ` “${f.q}”` : " those filters"}.`} />;
+  }
+  if (total === 1) return <PlayScene scene="header" caption={`Spot on! Found ${first ?? "1 player"}.`} />;
+  if (!f.q) return <PlayScene scene="freekick" caption={`Top bins! ${n} players match those filters.`} />;
+  if (total >= 10) return <PlayScene scene="bicycle" caption={`Bicycle kick! ${n} players found.`} />;
+  return <PlayScene scene="goal" caption={`Goal! ${n} players found.`} />;
 }

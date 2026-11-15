@@ -58,10 +58,10 @@ async function Player({ params }: Pick<PageProps<"/players/[id]">, "params">) {
 
   return (
     <>
-      {/* Rising estimate: hat-trick celebration. Falling: a tackle. */}
+      {/* Estimate doubles or more: hat-trick. Rises: knee slide. Falls: a tackle. */}
       {pr && (
         <PlayScene
-          scene={pr.mid > p.value ? "hattrick" : "tackle"}
+          scene={pr.mid >= 2 * p.value ? "hattrick" : pr.mid > p.value ? "kneeslide" : "tackle"}
           caption={
             pr.mid > p.value
               ? `${p.name} is on the rise: ${eur(pr.low)}–${eur(pr.high)} by ${pr.projection_date.slice(0, 4)}.`

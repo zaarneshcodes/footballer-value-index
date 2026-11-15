@@ -44,7 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Logo />
             <Link
               href="/players"
-              className="nav-link flex items-center gap-2 rounded-full border-2 border-[var(--chalk-line)]/70 px-3.5 py-1 font-display text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
+              className="nav-link press flex items-center gap-2 rounded-full border-2 border-[var(--chalk-line)]/70 px-3.5 py-1 font-display text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
             >
               <Ball className="nav-ball h-4 w-4" />
               Players

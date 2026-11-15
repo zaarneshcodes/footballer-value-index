@@ -72,7 +72,7 @@ export default async function Home() {
             <li key={l}>
               <Link
                 href={`/players?league=${encodeURIComponent(l)}`}
-                className="inline-block rounded-md border border-rule bg-sheet px-4 py-2 font-medium hover:border-pitch"
+                className="press inline-block rounded-md border border-rule bg-sheet px-4 py-2 font-medium hover:border-pitch"
               >
                 {l}
               </Link>

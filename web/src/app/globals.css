@@ -478,3 +478,143 @@ body {
     animation: none;
   }
 }
+
+/* Header: cross arrives, striker leaps and nods it in. */
+.m-header-body { animation-name: m-header-body; }
+@keyframes m-header-body {
+  0%, 25% { transform: none; }
+  42% { transform: translate(-4px, -18px) rotate(-12deg); }
+  52% { transform: translate(2px, -18px) rotate(14deg); }
+  75%, 100% { transform: none; }
+}
+.m-header-ball-x { animation-name: m-header-x; }
+@keyframes m-header-x {
+  0% { transform: translateX(-140px); }
+  46% { transform: translateX(0); }
+  70% { transform: translateX(88px); }
+  100% { transform: translateX(92px); }
+}
+.m-header-ball-y { animation-name: m-header-y; }
+@keyframes m-header-y {
+  0% { transform: translateY(-16px); }
+  46% { transform: translateY(-14px); }
+  70% { transform: translateY(46px); }
+  100% { transform: translateY(52px); }
+}
+
+/* Bicycle kick: flip back, scissor the leg, ball rockets into the net, land. */
+.m-bike-body { animation-name: m-bike-body; }
+@keyframes m-bike-body {
+  0%, 18% { transform: none; }
+  40% { transform: translateY(-46px) rotate(-150deg); }
+  56% { transform: translateY(-46px) rotate(-160deg); }
+  78%, 100% { transform: translateY(18px) rotate(-90deg); }
+}
+.m-bike-leg { animation-name: m-bike-leg; }
+@keyframes m-bike-leg {
+  0%, 38% { transform: rotate(0); }
+  46% { transform: rotate(-70deg); }
+  60%, 100% { transform: rotate(0); }
+}
+.m-bike-ball-x { animation-name: m-bike-x; }
+@keyframes m-bike-x {
+  0%, 46% { transform: translateX(0); }
+  70% { transform: translateX(118px); }
+  100% { transform: translateX(120px); }
+}
+.m-bike-ball-y { animation-name: m-bike-y; }
+@keyframes m-bike-y {
+  0% { transform: translateY(-60px); opacity: 0; }
+  10% { opacity: 1; }
+  44% { transform: translateY(14px); }
+  70% { transform: translateY(46px); }
+  100% { transform: translateY(50px); }
+}
+
+/* Free kick: wall jumps, ball curls over and dips under the bar. */
+.m-wall { animation-name: m-wall; }
+@keyframes m-wall {
+  0%, 26% { transform: none; }
+  36% { transform: translateY(-8px); }
+  48%, 100% { transform: none; }
+}
+.m-fk-ball-x { animation-name: m-fk-x; }
+@keyframes m-fk-x {
+  0%, 34% { transform: translateX(0); }
+  72% { transform: translateX(168px); }
+  100% { transform: translateX(170px); }
+}
+.m-fk-ball-y { animation-name: m-fk-y; }
+@keyframes m-fk-y {
+  0%, 34% { transform: translateY(0); animation-timing-function: var(--ease-out); }
+  54% { transform: translateY(-66px); animation-timing-function: var(--ease-in-out); }
+  72% { transform: translateY(-40px); }
+  100% { transform: translateY(-36px); }
+}
+.scene-freekick .m-shout,
+.scene-header .m-shout,
+.scene-bicycle .m-shout { animation-name: m-shout; }
+
+/* Knee slide: glide in from the left, lean back, spray kicks up behind. */
+.m-slide { animation-name: m-slide; animation-timing-function: var(--ease-out); }
+@keyframes m-slide {
+  0% { transform: translateX(-120px); opacity: 0; }
+  10% { opacity: 1; }
+  60% { transform: translateX(0) rotate(-16deg); }
+  100% { transform: translateX(6px) rotate(-18deg); }
+}
+.match-scene .m-spray {
+  animation-name: m-spray;
+  animation-duration: 700ms;
+  animation-timing-function: var(--ease-out);
+}
+@keyframes m-spray {
+  from { opacity: 0; transform: none; }
+  30% { opacity: 0.9; }
+  to { opacity: 0; transform: translate(-18px, -16px); }
+}
+.scene-kneeslide .m-shout { animation-name: m-shout-early; }
+@media (prefers-reduced-motion: reduce) {
+  .match-scene .m-spray { display: none; }
+}
+
+/* ---------- Review fixes (emil-design-eng) ---------- */
+/* Card grows out of the corner it lives in, not from its centre. */
+.match-card {
+  transform-origin: 100% 100%;
+}
+/* A struck ball leaves the boot at full speed and slows: ease-out on horizontal travel. */
+.match-scene .m-goal-ball-x,
+.match-scene .m-header-ball-x,
+.match-scene .m-bike-ball-x,
+.match-scene .m-save-ball-x,
+.match-scene .m-tackle-ball-x {
+  animation-timing-function: var(--ease-out);
+}
+/* Dead-ball free kick: steady sideways speed, height eases (rise fast, dip under the bar). */
+.match-scene .m-fk-ball-x {
+  animation-timing-function: linear;
+}
+/* Balls spin in flight (constant motion: linear). */
+.match-scene .m-spin {
+  animation: m-spin 1800ms linear both;
+}
+@keyframes m-spin {
+  to {
+    transform: rotate(900deg);
+  }
+}
+/* Pressables confirm the press. */
+.press {
+  transition-property: transform, opacity, border-color, background-color;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+}
+.press:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .match-scene .m-spin {
+    animation: none;
+  }
+}

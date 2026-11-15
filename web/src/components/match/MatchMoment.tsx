@@ -55,7 +55,7 @@ export function MatchMoment() {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const play = (m: Moment) => {
       window.__fviPendingMoment = undefined;
-      if (isOff()) return;
+      if (isOff() || document.hidden) return;
       clearTimeout(timer);
       setMoment({ ...m, id: Date.now() });
       timer = setTimeout(() => setMoment(null), SHOW_MS);
@@ -92,7 +92,7 @@ export function MatchMoment() {
                 setOff(true);
                 setMoment(null);
               }}
-              className="pointer-events-auto -mt-0.5 -mr-1 shrink-0 rounded px-1.5 text-base leading-none text-[var(--chalk-line)]/80 hover:text-[var(--chalk-line)]"
+              className="press pointer-events-auto -mt-0.5 -mr-1 shrink-0 rounded px-1.5 text-base leading-none text-[var(--chalk-line)]/80 hover:text-[var(--chalk-line)]"
               aria-label="Turn off match animations"
               title="Turn off match animations"
             >
