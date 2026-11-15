@@ -81,6 +81,7 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Age check (2026-11-15, `check_output.txt`): median mid ratio by age is 2.74x (<=21), 0.88x (22-24),
   0.44x (25-27), 0.18x (28-30), 0.16x (31+). The overall 0.43x reflects the age mix, which follows the
   normal rise-then-decline curve. Ranges for under-21s are very wide (90th-percentile ratio 13.6x), so show ranges only.
+- High-end (90th percentile) ratio by age: 13.62x (<=21), 3.09x (22-24), 1.27x (25-27), 0.44x (28-30), 0.31x (31+).
 
 ## Database (pipeline/schema.sql, pipeline/load_db.py)
 - Neon Postgres, 4 tables: `players`, `valuations`, `season_stats`, `projections`. Column names match the parquet files.
