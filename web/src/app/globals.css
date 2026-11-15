@@ -511,14 +511,16 @@ body {
   78%, 100% { transform: translateY(18px) rotate(-90deg); }
 }
 .m-bike-leg { animation-name: m-bike-leg; }
+/* Scissor: the kicking leg trails, then snaps through so the boot meets the ball at 46%. */
 @keyframes m-bike-leg {
-  0%, 38% { transform: rotate(0); }
-  46% { transform: rotate(-70deg); }
-  60%, 100% { transform: rotate(0); }
+  0%, 30% { transform: rotate(0); }
+  40% { transform: rotate(28deg); }
+  46%, 100% { transform: rotate(0); }
 }
 .m-bike-ball-x { animation-name: m-bike-x; }
+/* Contact point = the boot at the top of the flip (~95,25 in scene units), not the hips. */
 @keyframes m-bike-x {
-  0%, 46% { transform: translateX(0); }
+  0%, 46% { transform: translateX(6px); }
   70% { transform: translateX(118px); }
   100% { transform: translateX(120px); }
 }
@@ -526,7 +528,7 @@ body {
 @keyframes m-bike-y {
   0% { transform: translateY(-60px); opacity: 0; }
   10% { opacity: 1; }
-  44% { transform: translateY(14px); }
+  46% { transform: translateY(-17px); }
   70% { transform: translateY(46px); }
   100% { transform: translateY(50px); }
 }
