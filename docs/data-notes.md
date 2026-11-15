@@ -70,3 +70,8 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 ## Features (pipeline/features.py)
 - One row per valuation. Target: value ~5y later (nearest valuation within 180 days).
 - Stats come from the last season completed before the anchor, so no future data leaks in.
+
+## Model (pipeline/train.py)
+- LightGBM quantile regression (10/50/90) on log(value in 5y / value now).
+- Validation: fit on anchors before 2020, test on 2020-2021; baseline = "no change".
+- Known bias: players without a 5y valuation (retired/left) are absent, so projections may lean optimistic.

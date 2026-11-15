@@ -2,3 +2,4 @@
 pandas==2.2.3   # load and clean the Kaggle CSVs
 kaggle==1.6.17  # official client to download davidcariboo/player-scores
 pyarrow==18.1.0 # fast typed Parquet files for processed data
+lightgbm==4.5.0 # quantile gradient-boosting model (locked stack)
