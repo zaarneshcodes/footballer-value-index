@@ -77,4 +77,15 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Known bias: players without a 5y valuation (retired/left) are absent, so projections may lean optimistic.
 - Results (2026-11-15, validation on 2020-21 anchors): log-ratio MAE 0.836 vs baseline 1.485 (44% better);
   median abs % error 62% vs 84%; 10-90 range coverage 77.6% (target 80%).
-- Current players: median projected mid value is 0.43x today's value (to be sanity-checked by age).
+- Current players: median projected mid value is 0.43x today's value.
+- Age check (2026-11-15, `check_output.txt`): median mid ratio by age is 2.74x (<=21), 0.88x (22-24),
+  0.44x (25-27), 0.18x (28-30), 0.16x (31+). The overall 0.43x reflects the age mix, which follows the
+  normal rise-then-decline curve. Ranges for under-21s are very wide (90th-percentile ratio 13.6x), so show ranges only.
+
+## Database (pipeline/schema.sql, pipeline/load_db.py)
+- Neon Postgres, 4 tables: `players`, `valuations`, `season_stats`, `projections`. Column names match the parquet files.
+- Only site players are loaded: `valuations` and `season_stats` are filtered to `players.player_id`, with foreign keys enforced.
+- `projections` stores model estimates (10/50/90 quantiles). A CHECK keeps low <= mid <= high.
+- Some projections start from an older valuation (`value_date` 2022-2025), so the site must show `value_date`.
+- Load: `python pipeline/load_db.py` only fills empty tables. `--replace` empties and reloads all 4 in one transaction; any error or count mismatch rolls back.
+- `--dry-run` validates the data without connecting. The connection string comes only from `DATABASE_URL` and is never printed.
