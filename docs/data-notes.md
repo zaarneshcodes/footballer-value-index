@@ -75,3 +75,6 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - LightGBM quantile regression (10/50/90) on log(value in 5y / value now).
 - Validation: fit on anchors before 2020, test on 2020-2021; baseline = "no change".
 - Known bias: players without a 5y valuation (retired/left) are absent, so projections may lean optimistic.
+- Results (2026-11-15, validation on 2020-21 anchors): log-ratio MAE 0.836 vs baseline 1.485 (44% better);
+  median abs % error 62% vs 84%; 10-90 range coverage 77.6% (target 80%).
+- Current players: median projected mid value is 0.43x today's value (to be sanity-checked by age).
