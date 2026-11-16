@@ -1,4 +1,5 @@
 import { TOOL_DECLARATIONS, runTool } from "@/lib/chat-tools";
+import { FALLBACK_REPLY, checkReply, collectFacts, rateLimit, repairPrompt } from "@/lib/chat-guard";
 import { CARDS, SCOUT_SOP, type Card } from "@/lib/scout-sop";
 
 // POST { messages: [{ role: "user" | "assistant", text }] } -> { reply, card? }
@@ -17,6 +18,9 @@ const ROUTE = MODELS.length ? MODELS : DEFAULT_MODELS;
 const CALL_TIMEOUT_MS = 15_000; // one Gemini call
 const TOTAL_BUDGET_MS = 45_000; // the whole question, across all models
 export const maxDuration = 60;
+// Per-visitor limits (per server instance) so one person can't use up the shared free quota.
+const RATE_PER_MIN = Number(process.env.CHAT_RATE_PER_MIN) || 8;
+const RATE_PER_DAY = Number(process.env.CHAT_RATE_PER_DAY) || 150;
 const MAX_TOOL_ROUNDS = 4;
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 500;
@@ -81,7 +85,7 @@ function splitCard(raw: string): { reply: string; card: Card | null } {
       return "";
     })
     .trim();
-  return { reply: reply || "The ref has seen enough.", card };
+  return { reply: reply || "Sorry, I couldn't find an answer to that in our data.", card };
 }
 
 function parseMessages(body: unknown): ChatMessage[] | null {
@@ -125,37 +129,80 @@ async function generate(model: string, contents: Content[], key: string, deadlin
 }
 
 /**
- * Answer with one model from start to finish: its thought signatures only work
- * with itself, so a question never switches model halfway through.
+ * Run tool rounds with one model until it gives a text answer. Mutates `contents`
+ * (the conversation) and `outputs` (everything the tools returned, for the guard).
  */
-async function answerWith(model: string, history: Content[], key: string, deadline: number): Promise<string> {
-  const contents = [...history];
+async function runRounds(
+  model: string,
+  contents: Content[],
+  outputs: unknown[],
+  key: string,
+  deadline: number,
+): Promise<string> {
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const reply = await generate(model, contents, key, deadline);
     // Keep the model's parts exactly as sent (they can carry thought signatures).
     contents.push(reply);
     const calls = reply.parts.filter((p) => p.functionCall);
     if (calls.length === 0 || round === MAX_TOOL_ROUNDS) {
-      const text = reply.parts.map((p) => p.text ?? "").join("").trim();
-      return text || "Sorry, I couldn't find an answer to that in our data.";
+      return reply.parts.map((p) => p.text ?? "").join("").trim();
     }
     const results = await Promise.all(
-      calls.map(async ({ functionCall: fc }) => ({
-        functionResponse: {
-          name: fc!.name,
-          ...(fc!.id ? { id: fc!.id } : {}),
-          response: { result: await runTool(fc!.name, fc!.args ?? {}) },
-        },
-      })),
+      calls.map(async ({ functionCall: fc }) => {
+        const result = await runTool(fc!.name, fc!.args ?? {});
+        outputs.push(result);
+        return { functionResponse: { name: fc!.name, ...(fc!.id ? { id: fc!.id } : {}), response: { result } } };
+      }),
     );
     contents.push({ role: "user", parts: results });
   }
-  return "Sorry, I couldn't find an answer to that in our data.";
+  return "";
+}
+
+type GuardOutcome = "pass" | "repaired" | "fallback" | "blocked";
+
+/**
+ * Answer with one model from start to finish (its thought signatures only work with
+ * itself), then run the output guardrails: every number must come from this question's
+ * tool results. One repair attempt, then a safe fallback. Blocked content is replaced.
+ */
+async function guardedAnswer(
+  model: string,
+  history: Content[],
+  key: string,
+  deadline: number,
+): Promise<{ reply: string; card: Card | null; guard: GuardOutcome }> {
+  const contents = [...history];
+  const outputs: unknown[] = [];
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { reply, card } = splitCard(await runRounds(model, contents, outputs, key, deadline));
+    const v = checkReply(reply, collectFacts(outputs));
+    if (v.ok) return { reply, card, guard: attempt === 0 ? "pass" : "repaired" };
+    console.warn(`chat-guard: ${model} attempt ${attempt + 1}: ${[...v.blocked, ...v.ungrounded].join("; ")}`);
+    if (v.blocked.length) {
+      return {
+        reply: "The ref has blown the whistle on that one. Ask me about any player in the top five leagues.",
+        card: card ?? null,
+        guard: "blocked",
+      };
+    }
+    contents.push({ role: "user", parts: [{ text: repairPrompt(v) }] });
+  }
+  return { reply: FALLBACK_REPLY, card: null, guard: "fallback" };
 }
 
 export async function POST(req: Request) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return Response.json({ error: "Chat isn't set up yet." }, { status: 503 });
+
+  const visitor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const wait = rateLimit(visitor, RATE_PER_MIN, RATE_PER_DAY);
+  if (wait > 0) {
+    return Response.json(
+      { error: `Slow down, the ref is checking the watch. Try again in ${wait < 120 ? `${wait}s` : "a while"}.` },
+      { status: 429, headers: { "retry-after": String(wait) } },
+    );
+  }
 
   const messages = parseMessages(await req.json().catch(() => null));
   if (!messages) return Response.json({ error: "Send a question." }, { status: 400 });
@@ -169,9 +216,11 @@ export async function POST(req: Request) {
   try {
     for (const model of routeOrder(Date.now())) {
       try {
-        const { reply, card } = splitCard(await answerWith(model, history, key, deadline));
+        const { reply, card, guard } = await guardedAnswer(model, history, key, deadline);
         coolingUntil.delete(model);
-        return Response.json(card ? { reply, card } : { reply }, { headers: { "x-chat-model": model } });
+        return Response.json(card ? { reply, card } : { reply }, {
+          headers: { "x-chat-model": model, "x-chat-guard": guard },
+        });
       } catch (e) {
         if (!(e instanceof ModelUnavailable)) throw e;
         // Visible in Vercel's function logs: which model was skipped and why (no secrets).

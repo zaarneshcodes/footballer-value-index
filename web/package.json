@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:guard": "node --test tests/*.test.mjs",
+    "eval:chat": "node scripts/eval-chat.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.0",

@@ -143,3 +143,9 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Updates automatically whenever the dataset is reloaded into Neon (no scraping, no live feed).
 - Caveat shown on the page: only players currently in the top five leagues are in the database,
   so players who left (e.g. moved abroad) are missing from past rankings.
+
+## Guardrails and evals (chatbot) — 2026-11-16
+- Grounding check, repair-then-fallback, blocklist, rate limit, safe links: see docs/evals.md.
+- `npm run test:guard` (11 unit tests) and `npm run eval:chat` (29 cases; report in
+  docs/evals/chat-eval-latest.md). First local run 26/29 -> fixes -> 29/29 (97/97 checks).
+- Env knobs (not secrets): CHAT_RATE_PER_MIN (default 8), CHAT_RATE_PER_DAY (150), CHAT_MODELS.

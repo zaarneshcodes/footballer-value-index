@@ -15,11 +15,11 @@ const SUGGESTIONS = [
   "Who scored the most goals in the Premier League last season?",
 ];
 
-// Tiny, safe formatter for the replies: **bold**, *italic*, "- " / "1. " lists and links
+// Tiny, safe formatter for the replies: **bold**, *italic*, (non-player links become plain text), "- " / "1. " lists and links
 // to player pages only. No HTML from the model is ever rendered.
 function inline(text: string, key: string): ReactNode[] {
   const out: ReactNode[] = [];
-  const re = /\*\*(.+?)\*\*|\[([^\]]+)\]\((\/players\/\d+)\)|\*([^*\s][^*]*)\*/g;
+  const re = /\*\*(.+?)\*\*|\[([^\]]+)\]\((\/players\/\d+)\)|\*([^*\s][^*]*)\*|\[([^\]]+)\]\([^)]*\)/g;
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
@@ -27,6 +27,7 @@ function inline(text: string, key: string): ReactNode[] {
     const k = `${key}-${m.index}`;
     if (m[1]) out.push(<strong key={k} className="font-semibold">{inline(m[1], k)}</strong>);
     else if (m[4]) out.push(<em key={k}>{inline(m[4], k)}</em>);
+    else if (m[5]) out.push(m[5]); // any other link: keep the words, drop the link
     else
       out.push(
         <Link key={k} href={m[3]} className="font-semibold text-pitch underline underline-offset-2">
