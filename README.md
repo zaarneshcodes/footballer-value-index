@@ -69,6 +69,9 @@ flowchart TB
 
 ## The model
 
+Plain-English version with a worked example and a live age chart:
+**[How the estimates work](https://footballer-value-index.vercel.app/how-it-works)**.
+
 - **Target**: the ratio between a player's value about 5 years after a date and their value on
   that date (log scale), learned from 81,896 historical valuations of 8,064 players
   (2013–2021). Features: age, position, foot, height, current and peak value, 1-year value
