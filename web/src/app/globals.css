@@ -701,3 +701,94 @@ body {
     animation: none;
   }
 }
+
+/* Reaction cards: one quick entrance each, then still. */
+.rc-yellow .rc-title {
+  color: #a67c00;
+}
+.rc-red .rc-title {
+  color: #c01f33;
+}
+.rc-var .rc-title,
+.rc-offside .rc-title,
+.rc-board .rc-title {
+  color: var(--pitch);
+}
+@media (prefers-color-scheme: dark) {
+  .rc-yellow .rc-title {
+    color: #f5c518;
+  }
+  .rc-red .rc-title {
+    color: #ff6b7a;
+  }
+}
+.rc-raise {
+  transform-box: view-box;
+  transform-origin: 46px 92px;
+  animation: rc-raise 520ms var(--ease-out) both;
+  animation-delay: 80ms;
+}
+@keyframes rc-raise {
+  from {
+    transform: translateY(34px) rotate(-14deg);
+  }
+}
+.rc-shine {
+  animation: rc-shine 700ms var(--ease-out) 450ms both;
+}
+@keyframes rc-shine {
+  from {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.rc-scan {
+  animation: rc-scan 900ms linear 3 both;
+}
+@keyframes rc-scan {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(46px);
+  }
+}
+.rc-flag {
+  transform-box: view-box;
+  transform-origin: 47px 29px;
+  animation: rc-wave 280ms var(--ease-in-out) 6 alternate both;
+}
+@keyframes rc-wave {
+  from {
+    transform: skewY(-8deg) scaleX(0.92);
+  }
+  to {
+    transform: skewY(6deg) scaleX(1);
+  }
+}
+.rc-led {
+  animation: rc-led 240ms steps(2, jump-none) 4 both;
+  animation-delay: 500ms;
+}
+@keyframes rc-led {
+  from {
+    opacity: 0.2;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rc-raise,
+  .rc-shine,
+  .rc-scan,
+  .rc-flag,
+  .rc-led {
+    animation: none;
+  }
+  .rc-shine {
+    opacity: 0;
+  }
+}

@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ReactionCard } from "@/components/ReactionCard";
 import { ScoutAvatar } from "@/components/ScoutAvatar";
+import type { Card } from "@/lib/scout-sop";
 
-type Msg = { role: "user" | "assistant"; text: string; error?: boolean };
+type Msg = { role: "user" | "assistant"; text: string; card?: Card; error?: boolean };
 
 const SUGGESTIONS = [
   "Who are the 5 most valuable players in LaLiga?",
@@ -102,13 +104,18 @@ export function ChatBox() {
         method: "POST",
         headers: { "content-type": "application/json" },
         // Failed replies aren't sent back as history.
-        body: JSON.stringify({ messages: next.filter((m) => !m.error).map(({ role, text }) => ({ role, text })) }),
+        // Cards go back as tags so The Scout remembers which ones it already showed.
+        body: JSON.stringify({
+          messages: next
+            .filter((m) => !m.error)
+            .map(({ role, text, card }) => ({ role, text: card ? `[card:${card}] ${text}` : text })),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       setMessages((m) => [
         ...m,
         data.reply
-          ? { role: "assistant", text: data.reply }
+          ? { role: "assistant", text: data.reply, card: data.card }
           : { role: "assistant", text: data.error ?? "Something went wrong. Please try again.", error: true },
       ]);
     } catch {
@@ -159,6 +166,11 @@ export function ChatBox() {
               }`}
             >
               <span className="sr-only">{m.role === "user" ? "You:" : "The Scout:"}</span>
+              {m.card && (
+                <div className="mb-3">
+                  <ReactionCard card={m.card} />
+                </div>
+              )}
               {m.role === "user" ? m.text : <Formatted text={m.text} />}
               </div>
             </li>

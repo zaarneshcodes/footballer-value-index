@@ -60,7 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 href="/chat"
                 className="nav-link press flex items-center rounded-full border-2 border-[var(--chalk-line)]/70 px-2.5 py-1 font-display text-base sm:px-3.5 sm:text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
               >
-                Ask
+                Dugout
               </Link>
             </div>
           </nav>

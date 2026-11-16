@@ -99,9 +99,14 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - `npm audit`: 0 vulnerabilities in production deps; 7 moderate in ESLint dev tooling only (not shipped).
 
 ## Chatbot (/chat, /api/chat) — 2026-11-16
-- Gemini free tier via plain REST `fetch` (no SDK dependency). Model `gemini-flash-lite-latest`,
-  falling back to `gemini-flash-latest` when busy/rate-limited (429/5xx). Chosen by listing
-  models with our key; `gemini-2.5-flash` is closed to new keys.
+- Gemini free tier via plain REST `fetch` (no SDK dependency).
+- Model routing (2026-11-16): tries gemini-3.5-flash-lite -> 3.1-flash-lite -> 3.8-flash -> 3.5-flash
+  (each free-tier model has its own quota). A busy model is skipped for a while (429: Gemini's
+  retryDelay or 60s; 5xx: 20s; timeout: 30s; 404/retired: 1h). One model per question (thought
+  signatures are model-specific); if it fails mid-way the question restarts on the next model.
+  Limits: 15s per call, 45s per question, `maxDuration = 60`. `CHAT_MODELS` env var (comma list,
+  not secret) overrides the order. Skips are logged as `chat: <model> unavailable (<reason>)`;
+  the answering model is in the `x-chat-model` response header. 2.5 models are closed to new keys.
 - Gemini can only call four read-only tools (web/src/lib/chat-tools.ts): `search_players`,
   `get_player`, `top_players`, `top_scorers`. Arguments are validated; our fixed SQL runs (no model-written SQL).
   Money and dates are pre-formatted so the model doesn't do arithmetic.
@@ -114,6 +119,18 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - The bot is "The Scout". Avatar (components/ScoutAvatar.tsx) is an original SVG cartoon in
   Barcelona-style blue/garnet stripes with #19. Deliberately NOT a likeness of a real player:
   no traced face, no club crest or sponsor, not named after anyone.
+- Page renamed "The Dugout" (nav: Dugout). House SOPs for off-topic messages (greetings, questions
+  about the user, insults, betting, rule-breaking, gibberish...) live in web/src/lib/scout-sop.ts,
+  plain English, appended after the core rules (core rules always win). Tested: no repeated replies.
+- Meme mode (2026-11-16): for off-topic messages the SOP asks for meme-format, lightly trolling
+  replies with hard limits (roast the question not the person; no swearing, slurs, identity or
+  looks; PG). The model starts such replies with a tag like `[card:yellow]`; the route whitelists
+  it (yellow, red, var, offside, board), strips it and returns `{ reply, card }`. ChatBox shows an
+  original SVG reaction card (components/ReactionCard.tsx) and sends cards back as tags in history
+  so the bot can escalate yellow -> red. Real data answers never carry a card.
+- MemeCULT-1K (GitHub, research benchmark of 1,000 South Asian memes) was considered and rejected:
+  no data in the repo yet, no licence, third-party meme images, not football, and outside the
+  Kaggle-only data rule.
 - Today's date goes into the system prompt so "last season" maps to the latest season in the data.
 
 ## Top scorers (/scorers) — 2026-11-16
