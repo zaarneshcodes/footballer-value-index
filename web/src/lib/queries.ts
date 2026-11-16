@@ -306,29 +306,37 @@ export async function scorerSeasons(): Promise<number[]> {
   return rows.map((r) => r.season);
 }
 
+export type LeaderStat = "goals" | "assists";
+
 /**
- * Most league goals in a season, per league (top `limit` in each). Only players
- * currently in the top five leagues are in the database. Ties: assists, then fewer minutes.
+ * League leaders for a season, per league (top `limit` in each), by goals or assists.
+ * Only players currently in the top five leagues are in the database.
+ * Ties: the other stat (assists for goals, goals for assists), then fewer minutes.
  */
 export async function topScorers(f: {
   season: number;
   league: string | null;
   limit: number;
+  stat?: LeaderStat;
 }): Promise<ScorerRow[]> {
   "use cache";
   cacheLife("hours");
+  const stat: LeaderStat = f.stat === "assists" ? "assists" : "goals";
   return (await sql()`
     WITH s AS (
       SELECT st.player_id, st.league, sum(st.goals)::int AS goals, sum(st.assists)::int AS assists,
              sum(st.appearances)::int AS appearances, sum(st.minutes)::int AS minutes
       FROM season_stats st
       WHERE st.season = ${f.season} AND (${f.league}::text IS NULL OR st.league = ${f.league})
-      GROUP BY st.player_id, st.league
-      HAVING sum(st.goals) > 0),
+      GROUP BY st.player_id, st.league),
     r AS (
       SELECT s.*, row_number() OVER (
-               PARTITION BY s.league ORDER BY s.goals DESC, s.assists DESC, s.minutes, s.player_id) AS rk
-      FROM s)
+               PARTITION BY s.league
+               ORDER BY CASE WHEN ${stat}::text = 'assists' THEN s.assists ELSE s.goals END DESC,
+                        CASE WHEN ${stat}::text = 'assists' THEN s.goals ELSE s.assists END DESC,
+                        s.minutes, s.player_id) AS rk
+      FROM s
+      WHERE CASE WHEN ${stat}::text = 'assists' THEN s.assists ELSE s.goals END > 0)
     SELECT p.player_id::text AS id, p.name, p.current_club_name AS club, r.league,
            r.goals, r.assists, r.appearances, r.minutes
     FROM r JOIN players p USING (player_id)

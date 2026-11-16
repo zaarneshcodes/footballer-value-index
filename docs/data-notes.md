@@ -133,9 +133,13 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
   Kaggle-only data rule.
 - Today's date goes into the system prompt so "last season" maps to the latest season in the data.
 
-## Top scorers (/scorers) — 2026-11-16
+## Top scorers (/scorers) and top assists (/assists) — 2026-11-16
 - "Golden Boot race": top 10 league scorers per league for a season (pills for the last 6 seasons,
   `?season=2024` etc.). Query `topScorers()` in queries.ts; ties broken by assists, then fewer minutes.
+- "Playmaker race" (/assists, added later the same day): same board ranked by assists (ties: goals, then
+  fewer minutes). Shared code in components/Leaderboard.tsx with a Goals | Assists tab that keeps the
+  chosen season. No 4th nav button (wouldn't fit on phones); reached via the tab. Chat tool
+  `top_scorers` takes `stat: goals | assists`.
 - Updates automatically whenever the dataset is reloaded into Neon (no scraping, no live feed).
 - Caveat shown on the page: only players currently in the top five leagues are in the database,
   so players who left (e.g. moved abroad) are missing from past rankings.

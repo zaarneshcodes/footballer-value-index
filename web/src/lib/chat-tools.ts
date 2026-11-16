@@ -61,10 +61,11 @@ export const TOOL_DECLARATIONS = [
   {
     name: "top_scorers",
     description:
-      "Players with the most league goals in a season, per league (also assists, appearances, minutes). Only players currently in the top five leagues are included. Season is the start year: 2025 means 2025/26. Omit season for the latest one.",
+      "League leaders in a season, per league: most goals (stat='goals', default) or most assists (stat='assists'). Also returns the other stat, appearances and minutes. Only players currently in the top five leagues are included. Season is the start year: 2025 means 2025/26. Omit season for the latest one.",
     parameters: {
       type: "object",
       properties: {
+        stat: { type: "string", enum: ["goals", "assists"] },
         league: { type: "string", enum: [...LEAGUES] },
         season: { type: "integer", description: "Season start year, e.g. 2025 for 2025/26" },
         limit: { type: "integer", description: "Per league, 1 to 10, default 5" },
@@ -172,8 +173,10 @@ async function scorers(a: Args) {
     season: s,
     league: oneOf(a.league, LEAGUES),
     limit: int(a.limit, 1, 10) ?? 5,
+    stat: oneOf(a.stat, ["goals", "assists"] as const) ?? "goals",
   });
   return {
+    ranked_by: oneOf(a.stat, ["goals", "assists"] as const) ?? "goals",
     season: season(s),
     note:
       wanted != null && wanted !== s ? `No data for that season; showing ${season(s)}.` : undefined,
