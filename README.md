@@ -37,17 +37,22 @@ only from the site's own database.
 ## How it works
 
 ```mermaid
-flowchart LR
-  K[(Kaggle dataset<br/>davidcariboo/player-scores)] --> P[Python pipeline<br/>pandas: clean + features]
-  P --> M[LightGBM<br/>quantile model 10/50/90]
-  P --> DB[(Neon Postgres<br/>4 tables, 17 MB)]
+flowchart TB
+  subgraph offline ["Offline pipeline (Python)"]
+    K[("Kaggle dataset<br/>davidcariboo/player-scores")] --> P["pandas pipeline<br/>clean + features"]
+    P --> M["LightGBM<br/>quantile model 10/50/90"]
+  end
+  P --> DB[("Neon Postgres<br/>4 tables, 17 MB")]
   M --> DB
-  DB --> W[Next.js 16 on Vercel<br/>pages + API routes]
-  W --> U((Visitor))
-  U -- question --> C["/api/chat"]
-  C -- tools only --> DB
-  C <-- function calling --> G[Gemini free tier<br/>4-model routing]
-  C -- guardrails --> U
+  subgraph online ["Live site (Vercel)"]
+    W["Next.js 16<br/>pages + API routes"]
+    C["/api/chat<br/>guardrails + routing"]
+  end
+  DB --> W
+  DB -- "4 read-only tools" --> C
+  C <-- "function calling" --> G["Gemini free tier<br/>4 models"]
+  W --> U(("Visitor"))
+  U <-- "questions / checked answers" --> C
 ```
 
 | Part | Tech | Notes |
