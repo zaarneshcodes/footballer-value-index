@@ -117,7 +117,10 @@ async function Player({ params }: Pick<PageProps<"/players/[id]">, "params">) {
           <p className="max-w-prose leading-relaxed text-muted">
             The shaded band is where the model expects the value to be in{" "}
             {monthYear(pr.projection_date)}. When tested on past seasons, about 8 in 10 real
-            values landed inside ranges like this, so treat it as a rough guide.
+            values landed inside ranges like this, so treat it as a rough guide.{" "}
+            <Link href="/how-it-works" className="font-medium text-pitch underline underline-offset-2">
+              How the estimates work
+            </Link>
           </p>
         )}
       </section>

@@ -343,3 +343,26 @@ export async function topScorers(f: {
     WHERE r.rk <= ${f.limit}
     ORDER BY r.league, r.rk`) as ScorerRow[];
 }
+
+export type AgeBand = { band: string; players: number; median_ratio: number };
+
+/** Median of (middle 5-year estimate / current value) by current age group. */
+export async function estimateByAge(): Promise<AgeBand[]> {
+  "use cache";
+  cacheLife("hours");
+  return (await sql()`
+    WITH x AS (
+      SELECT date_part('year', age(p.date_of_birth))::int AS age,
+             pr.proj_mid_eur::float8 / pr.current_value_eur::float8 AS ratio
+      FROM players p JOIN projections pr USING (player_id)
+      WHERE p.date_of_birth IS NOT NULL AND pr.current_value_eur > 0)
+    SELECT band, count(*)::int AS players,
+           (percentile_cont(0.5) WITHIN GROUP (ORDER BY ratio))::float8 AS median_ratio
+    FROM (SELECT ratio, CASE WHEN age <= 21 THEN '21 or under' WHEN age <= 24 THEN '22–24'
+                             WHEN age <= 27 THEN '25–27' WHEN age <= 30 THEN '28–30'
+                             ELSE '31 or over' END AS band,
+                 CASE WHEN age <= 21 THEN 1 WHEN age <= 24 THEN 2 WHEN age <= 27 THEN 3
+                      WHEN age <= 30 THEN 4 ELSE 5 END AS ord
+          FROM x) b
+    GROUP BY band, ord ORDER BY ord`) as AgeBand[];
+}

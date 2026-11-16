@@ -149,3 +149,12 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - `npm run test:guard` (11 unit tests) and `npm run eval:chat` (29 cases; report in
   docs/evals/chat-eval-latest.md). First local run 26/29 -> fixes -> 29/29 (97/97 checks).
 - Env knobs (not secrets): CHAT_RATE_PER_MIN (default 8), CHAT_RATE_PER_DAY (150), CHAT_MODELS.
+
+## "How the estimates work" page (/how-it-works) — 2026-11-16
+- Plain-English explainer: worked example (Bukayo Saka, live from the DB, falls back to the most
+  valuable player), 4 build steps, validation stats from docs/train_output.txt (hard-coded: they only
+  change on retrain), "age matters most" chart and limitations.
+- Age chart is live: median (middle estimate / current value) by current age group via
+  `estimateByAge()`; one amber series (estimates colour), position + signed labels carry gain/loss
+  (red/green failed the colour-blind check). Data table markup, so screen readers get the numbers.
+- Linked from the footer disclaimer (every page) and under the estimate on player pages.

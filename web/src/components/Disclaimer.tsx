@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Disclaimer() {
   return (
     <p className="max-w-prose text-sm leading-relaxed text-muted">
@@ -9,7 +11,11 @@ export function Disclaimer() {
         davidcariboo/player-scores
       </a>
       . Five-year values are estimates from a statistical model, shown as a range. They are not
-      predictions you should rely on, and real values can land well outside the range.
+      predictions you should rely on, and real values can land well outside the range.{" "}
+      <Link href="/how-it-works" className="underline underline-offset-2">
+        How the estimates work
+      </Link>
+      .
     </p>
   );
 }
