@@ -246,3 +246,92 @@ export async function topPlayerIds(limit: number): Promise<string[]> {
     ORDER BY market_value_in_eur DESC, name, player_id LIMIT ${limit}`) as { id: string }[];
   return rows.map((r) => r.id);
 }
+
+export type TopSort = "value" | "estimate" | "growth";
+
+/**
+ * Ranked players with optional filters. "estimate" ranks by the model's middle
+ * 5-year estimate; "growth" by middle estimate / current value (players worth
+ * at least €5m, so tiny values don't dominate the ratio).
+ */
+export async function topPlayers(f: {
+  league: string | null;
+  position: string | null;
+  maxAge: number | null;
+  sort: TopSort;
+  limit: number;
+}): Promise<PlayerRow[]> {
+  "use cache";
+  cacheLife("hours");
+  return (await sql()`
+    SELECT p.player_id::text AS id, p.name, p.current_club_name AS club, p.league,
+           p.position, p.sub_position,
+           date_part('year', age(p.date_of_birth))::int AS age,
+           p.market_value_in_eur::float8 AS value,
+           pr.proj_low_eur::float8 AS low, pr.proj_mid_eur::float8 AS mid,
+           pr.proj_high_eur::float8 AS high
+    FROM players p
+    LEFT JOIN projections pr USING (player_id)
+    WHERE (${f.league}::text IS NULL OR p.league = ${f.league})
+      AND (${f.position}::text IS NULL OR p.position = ${f.position})
+      AND (${f.maxAge}::int IS NULL OR date_part('year', age(p.date_of_birth)) <= ${f.maxAge})
+      AND (${f.sort} = 'value' OR pr.proj_mid_eur IS NOT NULL)
+      AND (${f.sort} <> 'growth' OR p.market_value_in_eur >= 5000000)
+    ORDER BY CASE ${f.sort}
+               WHEN 'estimate' THEN pr.proj_mid_eur::float8
+               WHEN 'growth' THEN pr.proj_mid_eur::float8 / p.market_value_in_eur
+               ELSE p.market_value_in_eur::float8 END DESC NULLS LAST,
+             p.name, p.player_id
+    LIMIT ${f.limit}`) as PlayerRow[];
+}
+
+export type ScorerRow = {
+  id: string;
+  name: string;
+  club: string | null;
+  league: string;
+  goals: number;
+  assists: number;
+  appearances: number;
+  minutes: number;
+};
+
+/** Seasons with stats, newest first (start year, e.g. 2025 = 2025/26). */
+export async function scorerSeasons(): Promise<number[]> {
+  "use cache";
+  cacheLife("hours");
+  const rows = (await sql()`SELECT DISTINCT season FROM season_stats ORDER BY season DESC`) as {
+    season: number;
+  }[];
+  return rows.map((r) => r.season);
+}
+
+/**
+ * Most league goals in a season, per league (top `limit` in each). Only players
+ * currently in the top five leagues are in the database. Ties: assists, then fewer minutes.
+ */
+export async function topScorers(f: {
+  season: number;
+  league: string | null;
+  limit: number;
+}): Promise<ScorerRow[]> {
+  "use cache";
+  cacheLife("hours");
+  return (await sql()`
+    WITH s AS (
+      SELECT st.player_id, st.league, sum(st.goals)::int AS goals, sum(st.assists)::int AS assists,
+             sum(st.appearances)::int AS appearances, sum(st.minutes)::int AS minutes
+      FROM season_stats st
+      WHERE st.season = ${f.season} AND (${f.league}::text IS NULL OR st.league = ${f.league})
+      GROUP BY st.player_id, st.league
+      HAVING sum(st.goals) > 0),
+    r AS (
+      SELECT s.*, row_number() OVER (
+               PARTITION BY s.league ORDER BY s.goals DESC, s.assists DESC, s.minutes, s.player_id) AS rk
+      FROM s)
+    SELECT p.player_id::text AS id, p.name, p.current_club_name AS club, r.league,
+           r.goals, r.assists, r.appearances, r.minutes
+    FROM r JOIN players p USING (player_id)
+    WHERE r.rk <= ${f.limit}
+    ORDER BY r.league, r.rk`) as ScorerRow[];
+}

@@ -97,3 +97,28 @@ _None yet. Pending the next step: cleaning and filtering to the top-5 leagues._
 - Database access: `@neondatabase/serverless` 1.2.0 (Neon's HTTP driver, suited to Vercel serverless functions). Server-only module `web/src/lib/db.ts` reads `DATABASE_URL`.
 - `GET /api/health` returns table row counts only. It answers 503 with a generic message if the DB is unreachable and never echoes errors.
 - `npm audit`: 0 vulnerabilities in production deps; 7 moderate in ESLint dev tooling only (not shipped).
+
+## Chatbot (/chat, /api/chat) — 2026-11-16
+- Gemini free tier via plain REST `fetch` (no SDK dependency). Model `gemini-flash-lite-latest`,
+  falling back to `gemini-flash-latest` when busy/rate-limited (429/5xx). Chosen by listing
+  models with our key; `gemini-2.5-flash` is closed to new keys.
+- Gemini can only call four read-only tools (web/src/lib/chat-tools.ts): `search_players`,
+  `get_player`, `top_players`, `top_scorers`. Arguments are validated; our fixed SQL runs (no model-written SQL).
+  Money and dates are pre-formatted so the model doesn't do arithmetic.
+- System prompt: answer only from tool results, estimates as ranges labelled as estimates,
+  credit Transfermarkt, decline off-topic, links only to /players/{id}.
+- Limits: last 12 messages, 500 chars each, max 4 tool rounds, 25s per Gemini call.
+- Replies are rendered by a small formatter (bold, lists, /players links only), never as HTML.
+- Free-tier note shown under the chat: Google may use prompts to improve its products.
+- Needs `GEMINI_API_KEY` (Codespaces secret + Vercel env var). Without it the API returns 503.
+- The bot is "The Scout". Avatar (components/ScoutAvatar.tsx) is an original SVG cartoon in
+  Barcelona-style blue/garnet stripes with #19. Deliberately NOT a likeness of a real player:
+  no traced face, no club crest or sponsor, not named after anyone.
+- Today's date goes into the system prompt so "last season" maps to the latest season in the data.
+
+## Top scorers (/scorers) — 2026-11-16
+- "Golden Boot race": top 10 league scorers per league for a season (pills for the last 6 seasons,
+  `?season=2024` etc.). Query `topScorers()` in queries.ts; ties broken by assists, then fewer minutes.
+- Updates automatically whenever the dataset is reloaded into Neon (no scraping, no live feed).
+- Caveat shown on the page: only players currently in the top five leagues are in the database,
+  so players who left (e.g. moved abroad) are missing from past rankings.

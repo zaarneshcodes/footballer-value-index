@@ -42,13 +42,27 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </svg>
           <nav className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3.5">
             <Logo />
-            <Link
-              href="/players"
-              className="nav-link press flex items-center gap-2 rounded-full border-2 border-[var(--chalk-line)]/70 px-3.5 py-1 font-display text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
-            >
-              <Ball className="nav-ball h-4 w-4" />
-              Players
-            </Link>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Link
+                href="/players"
+                className="nav-link press flex items-center gap-2 rounded-full border-2 border-[var(--chalk-line)]/70 px-2.5 py-1 font-display text-base sm:px-3.5 sm:text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
+              >
+                <Ball className="nav-ball h-4 w-4 max-sm:hidden" />
+                Players
+              </Link>
+              <Link
+                href="/scorers"
+                className="nav-link press flex items-center rounded-full border-2 border-[var(--chalk-line)]/70 px-2.5 py-1 font-display text-base sm:px-3.5 sm:text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
+              >
+                Scorers
+              </Link>
+              <Link
+                href="/chat"
+                className="nav-link press flex items-center rounded-full border-2 border-[var(--chalk-line)]/70 px-2.5 py-1 font-display text-base sm:px-3.5 sm:text-lg font-semibold text-[var(--chalk-line)] hover:border-[var(--chalk-line)]"
+              >
+                Ask
+              </Link>
+            </div>
           </nav>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>

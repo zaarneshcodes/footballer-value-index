@@ -54,6 +54,10 @@ body {
   outline: 3px solid var(--flood-fill);
   outline-offset: 2px;
 }
+/* The chat box shows focus on its frame instead (border turns green). */
+#chat-input:focus-visible {
+  outline: none;
+}
 
 /* ---------- Motion ----------
    Curves from the animate skill; never hand-rolled. Only transform, opacity and
@@ -617,6 +621,83 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .match-scene .m-spin {
+    animation: none;
+  }
+}
+
+/* Chat: each new message settles in. The Scout blinks now and then and bobs
+   while an answer is on its way; three dots pulse beside the "checking" line. */
+.chat-in {
+  animation: fade-up 300ms var(--ease-out) both;
+}
+.scout-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: scout-blink 5s infinite;
+}
+@keyframes scout-blink {
+  0%, 94%, 100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+.scout-thinking .scout-body {
+  animation: scout-bob 900ms var(--ease-in-out) infinite alternate;
+}
+@keyframes scout-bob {
+  to {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+}
+.scout-body {
+  transform-origin: 32px 60px;
+}
+.chat-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+.chat-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--pitch);
+  animation: chat-dot 1s var(--ease-in-out) infinite;
+}
+.chat-dots span:nth-child(2) {
+  animation-delay: 150ms;
+}
+.chat-dots span:nth-child(3) {
+  animation-delay: 300ms;
+}
+@keyframes chat-dot {
+  50% {
+    opacity: 0.25;
+    transform: translateY(-3px);
+  }
+}
+/* Scorer bars grow from the left once, in rank order. */
+.bar-grow {
+  transform-origin: left;
+  animation: bar-grow 700ms var(--ease-out) both;
+  animation-delay: calc(150ms + var(--delay, 0ms));
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar-grow {
+    animation: none;
+  }
+  .chat-in {
+    animation: fade-in 200ms ease both;
+  }
+  .scout-eyes,
+  .scout-thinking .scout-body,
+  .chat-dots span {
     animation: none;
   }
 }

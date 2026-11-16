@@ -23,14 +23,14 @@ export function Ball({ className = "" }: { className?: string }) {
 export function Logo() {
   return (
     <Link href="/" aria-label="Footballer Value Index, home" className="logo group flex items-baseline gap-2">
-      <span aria-hidden className="font-display text-[1.65rem] leading-none font-bold tracking-tight text-[var(--chalk-line)] uppercase italic sm:text-3xl">
+      <span aria-hidden className="font-display text-[1.65rem] leading-none font-bold tracking-tight whitespace-nowrap text-[var(--chalk-line)] uppercase italic sm:text-3xl">
         F
         <span className="logo-ball-roll inline-block">
           <Ball className="logo-ball-spin inline-block h-[0.74em] w-[0.74em] align-[-0.04em]" />
         </span>
         otballer
       </span>
-      <span aria-hidden className="font-display text-lg leading-none font-semibold text-flood-fill sm:text-xl">
+      <span aria-hidden className="font-display text-lg leading-none font-semibold text-flood-fill max-[480px]:hidden sm:text-xl">
         Value Index
       </span>
     </Link>
